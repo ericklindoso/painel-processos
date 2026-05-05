@@ -5,76 +5,131 @@ export default function Home() {
     <main className="relative min-h-screen overflow-hidden">
       <div className="pointer-events-none absolute inset-0 grain" />
 
-      <div className="relative mx-auto flex min-h-screen max-w-6xl flex-col px-6 py-10 sm:px-10">
-        <header className="flex items-center justify-between border-b border-[--color-panel-line] pb-6">
-          <div className="flex items-center gap-3">
-            <span className="pulse-led h-2 w-2 rounded-full bg-[--color-amber]" />
-            <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-[--color-ink-dim]">
-              Sistema · Online · 24/7
-            </span>
+      <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col px-8 py-8 sm:px-12 sm:py-10">
+        {/* Top bar */}
+        <header className="flex items-center justify-between border-b border-[--color-rule] pb-5">
+          <div className="flex items-baseline gap-3">
+            <span className="font-serif text-2xl italic text-[--color-claret]">§</span>
+            <span className="label-eyebrow">Painel de Processos</span>
           </div>
-          <span className="font-mono text-[10px] tracking-[0.3em] text-[--color-ink-dim]">
-            BRT · v1.0
-          </span>
+          <nav className="hidden items-center gap-8 sm:flex">
+            <Link href="/admin" className="label-eyebrow hover:text-[--color-claret]">
+              Administração
+            </Link>
+            <Link href="/dashboard" className="label-eyebrow hover:text-[--color-claret]">
+              Painel Telão
+            </Link>
+            <Link href="/login" className="label-eyebrow hover:text-[--color-claret]">
+              Acessar
+            </Link>
+          </nav>
         </header>
 
-        <section className="flex flex-1 flex-col justify-center py-20">
-          <p className="reveal-up font-mono text-[11px] uppercase tracking-[0.4em] text-[--color-amber]">
-            ⟶ Painel de Processos
-          </p>
+        {/* Hero */}
+        <section className="relative grid flex-1 grid-cols-12 gap-8 py-16 sm:py-24">
+          <div className="col-span-12 lg:col-span-9">
+            <p className="reveal-up label-eyebrow text-[--color-claret]">
+              Volume I · Edição contínua · {new Date().getFullYear()}
+            </p>
 
-          <h1
-            className="reveal-up mt-4 font-display text-[clamp(3rem,11vw,9rem)] font-black uppercase leading-[0.85] text-[--color-cream]"
-            style={{ animationDelay: "120ms" }}
-          >
-            Acompanhamento
-            <br />
-            <span className="text-[--color-amber]">Administrativo</span>
-            <br />
-            em tempo real.
-          </h1>
+            <h1
+              className="reveal-up headline mt-8 text-[clamp(3.2rem,9.5vw,8.5rem)] text-[--color-ink]"
+              style={{ animationDelay: "120ms" }}
+            >
+              Acompanhamento de
+              <br />
+              <em>processos</em>
+              <br />
+              administrativos.
+            </h1>
 
-          <p
-            className="reveal-up mt-8 max-w-2xl font-serif text-2xl italic leading-snug text-[--color-ink-dim]"
-            style={{ animationDelay: "240ms" }}
-          >
-            Um sistema discreto de cadastro, gestão e exibição rotativa de processos
-            — projetado para o telão e para a sala.
-          </p>
+            <div
+              className="reveal-up mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[1fr_auto] lg:items-end"
+              style={{ animationDelay: "260ms" }}
+            >
+              <p className="max-w-xl font-sans text-lg leading-relaxed text-[--color-ink-2] lg:text-xl">
+                Cadastre, atualize e exiba processos em tempo real. Um painel discreto
+                para a sala administrativa — e um painel público para a parede.
+              </p>
 
-          <div className="reveal-up mt-12 flex flex-wrap items-center gap-4" style={{ animationDelay: "360ms" }}>
-            <Link href="/dashboard" className="btn btn-primary">
-              ⟶ Abrir Painel Telão
-            </Link>
-            <Link href="/admin" className="btn btn-ghost">
-              Acessar Administração
-            </Link>
+              <div className="flex flex-wrap items-center gap-3">
+                <Link href="/admin" className="btn btn-primary">
+                  Acessar painel administrativo
+                </Link>
+                <Link href="/dashboard" className="btn btn-ghost">
+                  Abrir painel público →
+                </Link>
+              </div>
+            </div>
           </div>
+
+          {/* Right: vertical metadata column */}
+          <aside className="col-span-12 mt-10 hidden border-l border-[--color-rule] pl-8 lg:col-span-3 lg:mt-0 lg:block">
+            <div className="space-y-8">
+              <div>
+                <div className="label-eyebrow text-[--color-claret]">Escopo</div>
+                <p className="mt-2 font-serif text-xl italic leading-snug text-[--color-ink]">
+                  Cadastro, gestão & exibição.
+                </p>
+              </div>
+              <div>
+                <div className="label-eyebrow text-[--color-claret]">Distribuição</div>
+                <p className="mt-2 font-sans text-base leading-snug text-[--color-ink-2]">
+                  Telão público em URL própria.
+                </p>
+              </div>
+              <div>
+                <div className="label-eyebrow text-[--color-claret]">Cadência</div>
+                <p className="mt-2 font-sans text-base leading-snug text-[--color-ink-2]">
+                  24 / 7 — sincronização em tempo real.
+                </p>
+              </div>
+            </div>
+          </aside>
         </section>
 
-        <section className="grid grid-cols-1 gap-px border-t border-[--color-panel-line] bg-[--color-panel-line] sm:grid-cols-3">
+        {/* Three-pane info */}
+        <section className="grid grid-cols-1 gap-px border-t border-[--color-rule] sm:grid-cols-3">
           {[
-            { kbd: "01", title: "Cadastro", body: "Número, objeto e status — com cor associada para destaque visual." },
-            { kbd: "02", title: "Painel /dashboard", body: "Rotação automática estilo split-flap, sem intervenção." },
-            { kbd: "03", title: "Tempo real", body: "Atualizações instantâneas via Supabase Realtime." },
+            {
+              num: "I",
+              title: "Cadastro",
+              body: "Número único, objeto, status em caixa alta — com cor associada para destaque visual.",
+            },
+            {
+              num: "II",
+              title: "Painel público",
+              body: "Rotação automática de processos, sem intervenção. URL exclusiva: /dashboard.",
+            },
+            {
+              num: "III",
+              title: "Tempo real",
+              body: "Atualizações instantâneas. Cada modificação reflete-se imediatamente no painel.",
+            },
           ].map((card, i) => (
-            <div
-              key={card.kbd}
-              className="reveal-up bg-[--color-bg] p-6"
-              style={{ animationDelay: `${480 + i * 100}ms` }}
+            <article
+              key={card.num}
+              className="reveal-up flex flex-col gap-3 border-r border-[--color-rule] py-8 pr-6 last:border-r-0 sm:py-10"
+              style={{ animationDelay: `${360 + i * 90}ms` }}
             >
-              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-[--color-amber]">
-                {card.kbd}
-              </div>
-              <h3 className="mt-3 font-display text-2xl font-bold uppercase text-[--color-cream]">
+              <span className="font-serif text-3xl italic text-[--color-claret]">{card.num}.</span>
+              <h3 className="font-serif text-3xl font-medium text-[--color-ink]">
                 {card.title}
               </h3>
-              <p className="mt-2 text-sm leading-relaxed text-[--color-ink-dim]">
-                {card.body}
-              </p>
-            </div>
+              <p className="text-base leading-relaxed text-[--color-ink-dim]">{card.body}</p>
+            </article>
           ))}
         </section>
+
+        {/* Footer */}
+        <footer className="mt-12 flex flex-col gap-3 border-t border-[--color-rule] pt-5 sm:flex-row sm:items-center sm:justify-between">
+          <span className="label-eyebrow">
+            Painel de Processos &nbsp;·&nbsp; Documento eletrônico oficial
+          </span>
+          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[--color-ink-mute]">
+            v1.1 &nbsp;·&nbsp; BRT
+          </span>
+        </footer>
       </div>
     </main>
   );

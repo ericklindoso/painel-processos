@@ -5,16 +5,16 @@ import { useState, useTransition } from "react";
 import type { Process } from "@/lib/types";
 
 const PRESET_COLORS = [
-  { name: "Sage", value: "#7B9E7E" },
-  { name: "Verde", value: "#1FB678" },
-  { name: "Cobre", value: "#D87C2D" },
-  { name: "Âmbar", value: "#F4B03A" },
-  { name: "Rubro", value: "#E44B3D" },
-  { name: "Azul", value: "#3D7BE4" },
-  { name: "Royal", value: "#5945D8" },
-  { name: "Rosa", value: "#E04B8C" },
-  { name: "Cinza", value: "#5C6478" },
-  { name: "Neutro", value: "#1F2937" },
+  { name: "Marinho", value: "#0E1A2D" },
+  { name: "Claret", value: "#7A1F12" },
+  { name: "Esmeralda", value: "#1E4D3F" },
+  { name: "Bronze", value: "#9C7846" },
+  { name: "Tijolo", value: "#B33A2A" },
+  { name: "Oliva", value: "#5C672D" },
+  { name: "Real", value: "#3D4F8C" },
+  { name: "Borgonha", value: "#5C170D" },
+  { name: "Carvão", value: "#3A3F4A" },
+  { name: "Pergaminho", value: "#8E7B5A" },
 ];
 
 type Props = {
@@ -41,31 +41,27 @@ export function ProcessForm({ initial, action, submitLabel }: Props) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="grid gap-8 lg:grid-cols-[1fr_360px]">
-      {/* Left: form fields */}
-      <div className="space-y-6">
-        <Field
-          label="Número do processo"
-          hint="único · obrigatório"
-          required
-        >
+    <form onSubmit={onSubmit} className="grid gap-12 lg:grid-cols-[1fr_380px]">
+      {/* Form fields */}
+      <div className="space-y-9">
+        <Field label="Número do processo" hint="único · obrigatório">
           <input
             name="numero"
             required
             defaultValue={initial?.numero}
             placeholder="ex: 2026/0001-A"
-            className="field-input"
+            className="field-input field-mono"
           />
         </Field>
 
-        <Field label="Objeto" hint="descrição resumida · obrigatório" required>
+        <Field label="Objeto" hint="descrição resumida · obrigatório">
           <textarea
             name="objeto"
             required
             defaultValue={initial?.objeto}
             rows={3}
             placeholder="Aquisição de equipamentos para o setor administrativo..."
-            className="field-input resize-none"
+            className="field-textarea"
           />
         </Field>
 
@@ -76,47 +72,46 @@ export function ProcessForm({ initial, action, submitLabel }: Props) {
             defaultValue={initial?.status}
             onChange={(e) => setStatusPreview(e.target.value)}
             placeholder="ex: em análise"
-            className="field-input"
+            className="field-input field-mono"
             style={{ textTransform: "uppercase" }}
           />
         </Field>
 
         {error && (
-          <div className="border border-[--color-rust]/40 bg-[--color-rust]/10 p-3 font-mono text-xs text-[--color-rust]">
-            ⚠ {error}
+          <div className="border-l-2 border-[--color-claret] bg-[--color-claret-soft]/30 px-4 py-3 text-sm text-[--color-claret]">
+            {error}
           </div>
         )}
 
-        <div className="flex items-center justify-between border-t border-[--color-panel-line] pt-6">
-          <Link href="/admin" className="btn btn-ghost">
-            ◀ Cancelar
+        <div className="flex items-center justify-between border-t border-[--color-rule] pt-6">
+          <Link href="/admin" className="btn btn-text">
+            ← Cancelar
           </Link>
-          <button type="submit" disabled={pending} className="btn btn-primary">
-            {pending ? "salvando..." : submitLabel}
+          <button type="submit" disabled={pending} className="btn btn-claret">
+            {pending ? "Salvando..." : submitLabel}
           </button>
         </div>
       </div>
 
-      {/* Right: color picker + preview */}
-      <aside className="space-y-6 lg:sticky lg:top-32 lg:self-start">
-        <div className="border border-[--color-panel-line] bg-[--color-panel] p-5">
-          <div className="font-mono text-[10px] uppercase tracking-[0.4em] text-[--color-amber]">
-            ⟶ Cor do status
-          </div>
-          <p className="mt-1 font-serif text-sm italic text-[--color-ink-dim]">
-            usada no telão para destacar visualmente.
+      {/* Color picker + preview */}
+      <aside className="space-y-8 lg:sticky lg:top-32 lg:self-start">
+        <div className="border border-[--color-rule] bg-[--color-paper-soft] p-6">
+          <p className="label-eyebrow text-[--color-claret]">Cor associada</p>
+          <p className="mt-1 font-serif text-base italic text-[--color-ink-dim]">
+            Usada no painel para destacar visualmente o status.
           </p>
 
-          <div className="mt-4 grid grid-cols-5 gap-2">
+          <div className="mt-5 grid grid-cols-5 gap-2.5">
             {PRESET_COLORS.map((c) => (
               <button
                 key={c.value}
                 type="button"
                 onClick={() => setColor(c.value)}
                 title={c.name}
+                aria-label={c.name}
                 className={`relative aspect-square rounded-sm transition ${
                   color === c.value
-                    ? "ring-2 ring-[--color-amber] ring-offset-2 ring-offset-[--color-panel]"
+                    ? "ring-2 ring-[--color-ink] ring-offset-2 ring-offset-[--color-paper-soft]"
                     : "hover:scale-105"
                 }`}
                 style={{ background: c.value }}
@@ -125,15 +120,13 @@ export function ProcessForm({ initial, action, submitLabel }: Props) {
           </div>
 
           <label className="mt-5 block">
-            <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.3em] text-[--color-ink-dim]">
-              hex personalizado
-            </span>
-            <div className="flex items-center gap-2">
+            <span className="label-eyebrow">Hex personalizado</span>
+            <div className="mt-2 flex items-center gap-2">
               <input
                 type="color"
                 value={color}
                 onChange={(e) => setColor(e.target.value.toUpperCase())}
-                className="h-10 w-14 cursor-pointer border border-[--color-panel-line] bg-transparent"
+                className="h-11 w-14 cursor-pointer border border-[--color-rule] bg-white"
               />
               <input
                 type="text"
@@ -143,20 +136,24 @@ export function ProcessForm({ initial, action, submitLabel }: Props) {
                   if (/^#[0-9a-fA-F]{0,6}$/.test(v)) setColor(v.toUpperCase());
                 }}
                 maxLength={7}
-                className="field-input"
+                className="field-input field-mono"
               />
             </div>
           </label>
         </div>
 
-        {/* Live preview */}
-        <div className="border border-[--color-panel-line] p-5">
-          <div className="font-mono text-[10px] uppercase tracking-[0.4em] text-[--color-ink-dim]">
-            ⟶ Pré-visualização
-          </div>
-          <div className="mt-4 flex items-center gap-3 border-l-4 px-4 py-3" style={{ borderColor: color, background: "rgba(255,255,255,0.02)" }}>
-            <span className="h-2 w-2 rounded-full" style={{ background: color, boxShadow: `0 0 12px ${color}` }} />
-            <span className="font-display text-2xl font-black uppercase tracking-wide" style={{ color }}>
+        {/* Live preview card */}
+        <div className="border border-[--color-rule] p-6">
+          <p className="label-eyebrow">Pré-visualização</p>
+          <div
+            className="mt-4 flex items-center gap-3 border-l-4 bg-[--color-paper-soft] px-5 py-4"
+            style={{ borderColor: color }}
+          >
+            <span className="color-chip" style={{ color }} />
+            <span
+              className="truncate font-sans text-base font-medium uppercase tracking-wide"
+              style={{ color }}
+            >
               {statusPreview || "STATUS"}
             </span>
           </div>
@@ -169,23 +166,18 @@ export function ProcessForm({ initial, action, submitLabel }: Props) {
 function Field({
   label,
   hint,
-  required,
   children,
 }: {
   label: string;
   hint?: string;
-  required?: boolean;
   children: React.ReactNode;
 }) {
   return (
-    <label className="block">
+    <label className="field">
       <span className="mb-2 flex items-baseline justify-between">
-        <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-[--color-cream]">
-          ⟶ {label}
-          {required && <span className="ml-1 text-[--color-amber]">*</span>}
-        </span>
+        <span className="field-label !mb-0">{label}</span>
         {hint && (
-          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[--color-ink-mute]">
+          <span className="font-serif text-xs italic text-[--color-ink-mute]">
             {hint}
           </span>
         )}

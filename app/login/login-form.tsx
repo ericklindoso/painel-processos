@@ -48,9 +48,8 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5">
-      {/* Mode toggle */}
-      <div className="flex gap-1 border border-[--color-panel-line] p-1">
+    <form onSubmit={onSubmit} className="space-y-7">
+      <div className="flex items-center gap-6 border-b border-[--color-rule] pb-3">
         {(["signin", "signup"] as const).map((m) => (
           <button
             key={m}
@@ -60,21 +59,22 @@ export function LoginForm() {
               setError(null);
               setInfo(null);
             }}
-            className={`flex-1 px-3 py-2 font-mono text-[11px] uppercase tracking-[0.2em] transition ${
+            className={`relative pb-2 font-sans text-sm font-medium transition ${
               mode === m
-                ? "bg-[--color-amber] text-[--color-bg]"
-                : "text-[--color-ink-dim] hover:text-[--color-amber]"
+                ? "text-[--color-ink]"
+                : "text-[--color-ink-mute] hover:text-[--color-ink]"
             }`}
           >
             {m === "signin" ? "Entrar" : "Criar conta"}
+            {mode === m && (
+              <span className="absolute -bottom-[13px] left-0 right-0 h-[2px] bg-[--color-claret]" />
+            )}
           </button>
         ))}
       </div>
 
-      <label className="block">
-        <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.3em] text-[--color-ink-dim]">
-          ⟶ E-mail
-        </span>
+      <label className="field">
+        <span className="field-label">E-mail</span>
         <input
           type="email"
           required
@@ -82,14 +82,12 @@ export function LoginForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="usuario@dominio.com"
-          className="field-input"
+          className="field-input field-mono"
         />
       </label>
 
-      <label className="block">
-        <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.3em] text-[--color-ink-dim]">
-          ⟶ Senha
-        </span>
+      <label className="field">
+        <span className="field-label">Senha</span>
         <input
           type="password"
           required
@@ -97,24 +95,24 @@ export function LoginForm() {
           autoComplete={mode === "signin" ? "current-password" : "new-password"}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="• • • • • •"
-          className="field-input"
+          placeholder="•••••••••"
+          className="field-input field-mono"
         />
       </label>
 
       {error && (
-        <div className="border border-[--color-rust]/40 bg-[--color-rust]/10 p-3 font-mono text-xs text-[--color-rust]">
-          ⚠ {error}
+        <div className="border-l-2 border-[--color-claret] bg-[--color-claret-soft]/30 px-4 py-3 text-sm text-[--color-claret]">
+          {error}
         </div>
       )}
       {info && (
-        <div className="border border-[--color-amber]/40 bg-[--color-amber]/10 p-3 font-mono text-xs text-[--color-amber]">
-          ✓ {info}
+        <div className="border-l-2 border-[--color-emerald] bg-[--color-emerald]/10 px-4 py-3 text-sm text-[--color-emerald]">
+          {info}
         </div>
       )}
 
       <button type="submit" disabled={loading} className="btn btn-primary w-full">
-        {loading ? "processando..." : mode === "signin" ? "⟶ Entrar no painel" : "⟶ Criar conta"}
+        {loading ? "Processando..." : mode === "signin" ? "Entrar no painel" : "Criar conta"}
       </button>
     </form>
   );

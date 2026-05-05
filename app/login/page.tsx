@@ -6,80 +6,73 @@ export default function LoginPage() {
     <main className="relative min-h-screen overflow-hidden">
       <div className="pointer-events-none absolute inset-0 grain" />
 
-      {/* Decorative background board */}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.07]">
-        <div className="font-display text-[28vw] font-black leading-none tracking-tight text-[--color-amber] select-none">
-          ACESSO
-        </div>
-      </div>
-
-      <div className="relative grid min-h-screen lg:grid-cols-[1fr_minmax(420px,520px)]">
-        {/* Left editorial column */}
-        <aside className="relative hidden flex-col justify-between border-r border-[--color-panel-line] p-12 lg:flex">
+      <div className="relative grid min-h-screen lg:grid-cols-[1.2fr_minmax(440px,520px)]">
+        {/* Editorial column */}
+        <aside className="relative hidden flex-col justify-between border-r border-[--color-rule] p-12 lg:flex">
           <Link
             href="/"
-            className="font-mono text-[10px] uppercase tracking-[0.3em] text-[--color-ink-dim] hover:text-[--color-amber]"
+            className="label-eyebrow w-fit hover:text-[--color-claret]"
           >
-            ◀ voltar à entrada
+            ← Voltar à entrada
           </Link>
 
-          <div className="space-y-6">
-            <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-[--color-amber]">
-              ⟶ Sistema de Acompanhamento
-            </p>
-            <h1 className="font-display text-7xl font-black uppercase leading-[0.85] text-[--color-cream]">
-              Painel de
-              <br />
-              <span className="italic font-serif font-normal text-[--color-amber]">processos</span>
-              <br />
-              administrativos.
-            </h1>
-            <p className="max-w-md font-serif text-2xl italic leading-snug text-[--color-ink-dim]">
-              Um cofre discreto. Apenas quem cadastra, edita. Qualquer um observa pelo telão.
-            </p>
+          <div className="space-y-10">
+            <div className="space-y-6">
+              <span className="font-serif text-3xl italic text-[--color-claret]">§</span>
+              <p className="label-eyebrow text-[--color-claret]">Documento I · Acesso</p>
+              <h1 className="headline text-[clamp(3rem,7vw,6.5rem)] text-[--color-ink]">
+                Acesso restrito ao
+                <br />
+                <em>painel</em>
+                <br />
+                administrativo.
+              </h1>
+            </div>
+
+            <blockquote className="border-l-2 border-[--color-claret] pl-6">
+              <p className="font-serif text-2xl italic leading-snug text-[--color-ink-2]">
+                "Quem cadastra, edita. Qualquer um observa pelo telão público."
+              </p>
+              <footer className="mt-3 label-eyebrow">— Princípio de operação</footer>
+            </blockquote>
           </div>
 
-          <div className="flex items-center justify-between border-t border-[--color-panel-line] pt-6">
-            <div className="flex items-center gap-3">
-              <span className="pulse-led h-2 w-2 rounded-full bg-[--color-amber]" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-[--color-ink-dim]">
-                conexão segura
-              </span>
-            </div>
-            <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-[--color-ink-dim]">
-              tls · supabase
+          <div className="flex items-center justify-between border-t border-[--color-rule] pt-5">
+            <span className="label-eyebrow">Conexão segura · TLS</span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[--color-ink-mute]">
+              Supabase
             </span>
           </div>
         </aside>
 
-        {/* Right form column */}
-        <section className="relative flex flex-col justify-center bg-[--color-panel] p-8 sm:p-12">
-          <div className="absolute inset-0 grain" />
-          <div className="relative">
-            <Link
-              href="/"
-              className="mb-8 inline-block font-mono text-[10px] uppercase tracking-[0.3em] text-[--color-ink-dim] hover:text-[--color-amber] lg:hidden"
-            >
-              ◀ voltar
-            </Link>
+        {/* Form column */}
+        <section className="relative flex flex-col justify-center bg-[--color-paper-soft] p-8 sm:p-14">
+          <Link
+            href="/"
+            className="label-eyebrow mb-10 inline-block w-fit hover:text-[--color-claret] lg:hidden"
+          >
+            ← Voltar
+          </Link>
 
-            <div className="mb-10 flex items-center gap-3">
-              <div className="h-10 w-1 bg-[--color-amber]" />
-              <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-[--color-amber]">
-                  estação 01 · admin
-                </p>
-                <h2 className="font-display text-4xl font-black uppercase text-[--color-cream]">
-                  Identifique-se
-                </h2>
-              </div>
-            </div>
-
-            <LoginForm />
-
-            <p className="mt-10 border-t border-[--color-panel-line] pt-6 font-mono text-[10px] uppercase tracking-[0.25em] text-[--color-ink-mute]">
-              dashboard público em <Link href="/dashboard" className="text-[--color-amber] hover:underline">/dashboard</Link>
+          <div className="mb-10">
+            <p className="label-eyebrow text-[--color-claret]">Identificação</p>
+            <h2 className="headline mt-2 text-5xl text-[--color-ink]">
+              Entrar.
+            </h2>
+            <p className="mt-3 font-serif text-lg italic text-[--color-ink-dim]">
+              Use suas credenciais administrativas.
             </p>
+          </div>
+
+          <LoginForm />
+
+          <div className="mt-12 flex items-center justify-between border-t border-[--color-rule] pt-5">
+            <span className="label-eyebrow">
+              Painel público disponível em{" "}
+              <Link href="/dashboard" className="text-[--color-claret] underline-offset-4 hover:underline">
+                /dashboard
+              </Link>
+            </span>
           </div>
         </section>
       </div>

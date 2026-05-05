@@ -25,60 +25,60 @@ export default async function AdminPage({
 
   const { data, error } = await query;
   const processes: Process[] = (data as Process[] | null) ?? [];
+  const lastUpdate = processes[0];
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-10 sm:px-10">
-      {/* Title block */}
-      <section className="flex flex-col gap-6 border-b border-[--color-panel-line] pb-8 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.4em] text-[--color-amber]">
-            ⟶ Cadastro & Gestão
-          </p>
-          <h1 className="mt-3 font-display text-5xl font-black uppercase leading-none text-[--color-cream] sm:text-6xl">
-            Processos<span className="text-[--color-amber]">.</span>
+    <div className="mx-auto max-w-7xl px-6 py-12 sm:px-12">
+      {/* Heading */}
+      <section className="mb-10 grid grid-cols-12 items-end gap-6 border-b border-[--color-rule] pb-8">
+        <div className="col-span-12 lg:col-span-8">
+          <p className="label-eyebrow text-[--color-claret]">Cadastro & gestão</p>
+          <h1 className="headline mt-3 text-6xl text-[--color-ink] sm:text-7xl">
+            Lista de <em>processos</em>.
           </h1>
-          <p className="mt-3 max-w-xl font-serif text-lg italic text-[--color-ink-dim]">
-            Lista mestre. Edite, exclua, ou cadastre. O telão reflete instantaneamente.
+          <p className="mt-4 max-w-2xl font-serif text-lg italic leading-snug text-[--color-ink-dim]">
+            Edite, exclua ou cadastre novos. Toda modificação reflete-se no painel
+            público em tempo real.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="col-span-12 flex flex-wrap items-center gap-3 lg:col-span-4 lg:justify-end">
           <SearchForm initial={q} />
-          <Link href="/admin/new" className="btn btn-primary whitespace-nowrap">
+          <Link href="/admin/new" className="btn btn-claret whitespace-nowrap">
             + Novo processo
           </Link>
         </div>
       </section>
 
-      {/* Stat strip */}
-      <section className="my-8 grid grid-cols-2 gap-px border border-[--color-panel-line] bg-[--color-panel-line] sm:grid-cols-4">
-        <Stat kbd="01" label="Total" value={String(processes.length).padStart(3, "0")} />
+      {/* Stats */}
+      <section className="mb-10 grid grid-cols-2 gap-x-8 gap-y-6 border-b border-[--color-rule] pb-10 sm:grid-cols-4">
+        <Stat num="I" label="Total cadastrado" value={String(processes.length).padStart(3, "0")} />
         <Stat
-          kbd="02"
+          num="II"
           label="Status únicos"
           value={String(new Set(processes.map((p) => p.status)).size).padStart(2, "0")}
         />
         <Stat
-          kbd="03"
+          num="III"
           label="Última atualização"
           value={
-            processes[0]
+            lastUpdate
               ? new Intl.DateTimeFormat("pt-BR", {
                   hour: "2-digit",
                   minute: "2-digit",
                   day: "2-digit",
                   month: "2-digit",
-                }).format(new Date(processes[0].updated_at))
+                }).format(new Date(lastUpdate.updated_at))
               : "—"
           }
         />
-        <Stat kbd="04" label="Modo" value="ADMIN" />
+        <Stat num="IV" label="Modo" value="Administrador" />
       </section>
 
       {/* List */}
       {error ? (
-        <div className="border border-[--color-rust]/40 bg-[--color-rust]/10 p-4 font-mono text-sm text-[--color-rust]">
-          ⚠ {error.message}
+        <div className="border-l-2 border-[--color-claret] bg-[--color-claret-soft]/30 px-5 py-4 text-sm text-[--color-claret]">
+          {error.message}
         </div>
       ) : processes.length === 0 ? (
         <EmptyState query={q} />
@@ -94,34 +94,27 @@ function SearchForm({ initial }: { initial: string }) {
     <form
       action="/admin"
       method="get"
-      className="flex items-center gap-0 border border-[--color-panel-line] bg-[--color-bg-elev] focus-within:border-[--color-amber]"
+      className="flex w-full items-center gap-2 border border-[--color-rule] bg-[--color-paper-soft] px-3 py-1.5 transition focus-within:border-[--color-claret] focus-within:bg-white sm:w-auto"
     >
-      <span className="px-3 font-mono text-[10px] uppercase tracking-[0.3em] text-[--color-ink-dim]">
-        ⌕
-      </span>
+      <span className="font-serif text-base italic text-[--color-ink-dim]">⌕</span>
       <input
         name="q"
         defaultValue={initial}
         placeholder="buscar por número ou objeto..."
-        className="w-72 bg-transparent py-2 pr-3 font-mono text-sm text-[--color-ink] placeholder:italic placeholder:text-[--color-ink-mute] focus:outline-none"
+        className="w-full bg-transparent py-1 font-sans text-sm text-[--color-ink] placeholder:italic placeholder:text-[--color-ink-mute] focus:outline-none sm:w-72"
       />
-      <button
-        type="submit"
-        className="border-l border-[--color-panel-line] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.3em] text-[--color-ink-dim] hover:bg-[--color-amber] hover:text-[--color-bg]"
-      >
-        Filtrar
-      </button>
     </form>
   );
 }
 
-function Stat({ kbd, label, value }: { kbd: string; label: string; value: string }) {
+function Stat({ num, label, value }: { num: string; label: string; value: string }) {
   return (
-    <div className="bg-[--color-bg] p-5">
-      <div className="font-mono text-[9px] uppercase tracking-[0.4em] text-[--color-amber]">
-        {kbd} · {label}
+    <div>
+      <div className="flex items-baseline gap-2">
+        <span className="font-serif text-xl italic text-[--color-claret]">{num}.</span>
+        <span className="label-eyebrow">{label}</span>
       </div>
-      <div className="mt-2 font-display text-3xl font-black uppercase leading-none text-[--color-cream]">
+      <div className="mt-2 font-serif text-3xl text-[--color-ink] tabular sm:text-4xl">
         {value}
       </div>
     </div>
@@ -130,26 +123,23 @@ function Stat({ kbd, label, value }: { kbd: string; label: string; value: string
 
 function EmptyState({ query }: { query: string }) {
   return (
-    <div className="relative overflow-hidden border border-dashed border-[--color-panel-line] py-24 text-center">
-      <div className="pointer-events-none absolute inset-0 grain opacity-50" />
-      <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-[--color-amber]">
-        ⟶ Nenhum processo
-      </p>
-      <h3 className="mt-3 font-display text-4xl font-black uppercase text-[--color-cream]">
-        {query ? "Sem resultados." : "Nada cadastrado ainda."}
+    <div className="border-y-2 border-double border-[--color-rule] py-24 text-center">
+      <p className="label-eyebrow text-[--color-claret]">Sem registros</p>
+      <h3 className="headline mt-4 text-5xl text-[--color-ink]">
+        {query ? <>Nenhum resultado.</> : <><em>Nada</em> cadastrado ainda.</>}
       </h3>
-      <p className="mx-auto mt-3 max-w-md font-serif text-lg italic text-[--color-ink-dim]">
+      <p className="mx-auto mt-4 max-w-md font-serif text-lg italic text-[--color-ink-dim]">
         {query
           ? `Nada bate com "${query}". Tente outro termo ou limpe o filtro.`
           : "Cadastre o primeiro processo para começar a popular o painel."}
       </p>
-      <div className="mt-6 flex justify-center gap-3">
+      <div className="mt-8 flex justify-center gap-3">
         {query ? (
           <Link href="/admin" className="btn btn-ghost">
             Limpar filtro
           </Link>
         ) : null}
-        <Link href="/admin/new" className="btn btn-primary">
+        <Link href="/admin/new" className="btn btn-claret">
           + Novo processo
         </Link>
       </div>

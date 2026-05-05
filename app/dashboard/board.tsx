@@ -1,23 +1,22 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import type { Process } from "@/lib/types";
-import { FlapText } from "./flap";
 
 const ROWS_PER_PAGE = 6;
-const PAGE_DURATION_MS = 7000;
-const LAST_UPDATES_DURATION_MS = 9000;
-const NUMERO_LEN = 14;
-const OBJETO_LEN = 38;
-const STATUS_LEN = 16;
+const PAGE_DURATION_MS = 7500;
+const LAST_UPDATES_DURATION_MS = 10000;
+
+const TRANSITION = { duration: 0.7, ease: [0.2, 0.8, 0.2, 1] as const };
 
 export function Board({ initial }: { initial: Process[] }) {
   const [processes, setProcesses] = useState<Process[]>(initial);
   const [pageIndex, setPageIndex] = useState(0);
   const [now, setNow] = useState<Date | null>(null);
 
-  // Hydrate clock client-side only to avoid SSR mismatch
+  // Hydrate clock client-side only
   useEffect(() => {
     setNow(new Date());
     const id = window.setInterval(() => setNow(new Date()), 1000);
@@ -47,11 +46,11 @@ export function Board({ initial }: { initial: Process[] }) {
     };
   }, []);
 
-  // Sort by updated_at desc for "last updates" view, by numero for board
   const boardSorted = useMemo(
     () => [...processes].sort((a, b) => a.numero.localeCompare(b.numero)),
     [processes],
   );
+
   const recent = useMemo(
     () =>
       [...processes]
@@ -65,18 +64,16 @@ export function Board({ initial }: { initial: Process[] }) {
     for (let i = 0; i < boardSorted.length; i += ROWS_PER_PAGE) {
       chunks.push(boardSorted.slice(i, i + ROWS_PER_PAGE));
     }
-    if (chunks.length === 0) chunks.push([]); // ensure at least one main page
+    if (chunks.length === 0) chunks.push([]);
     return chunks;
   }, [boardSorted]);
 
-  const totalPages = pages.length + 1; // + last-updates page
+  const totalPages = pages.length + 1;
 
-  // Reset page index if data shrinks
   useEffect(() => {
     if (pageIndex >= totalPages) setPageIndex(0);
   }, [totalPages, pageIndex]);
 
-  // Auto-rotate
   useEffect(() => {
     const isLast = pageIndex === pages.length;
     const duration = isLast ? LAST_UPDATES_DURATION_MS : PAGE_DURATION_MS;
@@ -89,87 +86,83 @@ export function Board({ initial }: { initial: Process[] }) {
   const isLastUpdates = pageIndex === pages.length;
   const currentPage = isLastUpdates ? null : pages[pageIndex];
 
-  // Build rows for the board: pad to ROWS_PER_PAGE so layout doesn't jump
-  const visibleRows: (Process | null)[] = isLastUpdates
-    ? []
-    : Array.from({ length: ROWS_PER_PAGE }, (_, i) => currentPage?.[i] ?? null);
-
   return (
-    <div className="relative min-h-screen overflow-hidden flap-board">
+    <div className="board-paper relative flex min-h-screen flex-col">
       <div className="pointer-events-none absolute inset-0 grain" />
 
       {/* Top header */}
-      <header className="relative z-10 flex items-end justify-between px-8 pb-3 pt-6 border-b border-[--color-panel-line]/60">
-        <div className="flex items-center gap-4">
-          <span className="pulse-led h-2.5 w-2.5 rounded-full bg-[--color-amber]" />
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-[--color-amber]">
-              ⟶ Painel de Processos · Em tempo real
-            </p>
-            <h1 className="font-display text-4xl font-black uppercase leading-none text-[--color-cream] sm:text-5xl">
-              Acompanhamento Administrativo
-            </h1>
+      <header className="relative z-10 border-b border-[--color-rule] px-12 py-6">
+        <div className="flex items-end justify-between gap-8">
+          <div className="flex items-baseline gap-4">
+            <span className="font-serif text-4xl italic text-[--color-claret]">§</span>
+            <div>
+              <div className="flex items-center gap-3">
+                <span className="relative inline-block h-1.5 w-1.5 rounded-full bg-[--color-claret]">
+                  <span className="live-dot absolute inset-0 rounded-full" />
+                </span>
+                <p className="label-eyebrow text-[--color-claret]">
+                  Em transmissão · Atualização contínua
+                </p>
+              </div>
+              <h1 className="headline mt-1.5 text-4xl text-[--color-ink] sm:text-5xl">
+                Acompanhamento de <em>processos</em>.
+              </h1>
+            </div>
           </div>
-        </div>
 
-        <div className="text-right">
-          <div className="font-mono text-[10px] uppercase tracking-[0.4em] text-[--color-ink-dim]">
-            {now ? formatDate(now) : "—"}
-          </div>
-          <div className="font-mono text-3xl font-bold leading-none text-[--color-amber] sm:text-4xl">
-            {now ? formatTime(now) : "00:00:00"}
+          <div className="text-right">
+            <div className="label-eyebrow">{now ? formatDate(now) : "—"}</div>
+            <div className="font-serif text-5xl tabular text-[--color-ink] sm:text-6xl">
+              {now ? formatTime(now) : "—— : ——"}
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Column headers — only on board pages */}
-      {!isLastUpdates && (
-        <div className="relative z-10 grid grid-cols-[1.2fr_2.8fr_1.4fr_0.8fr] items-center gap-6 border-b border-[--color-panel-line]/60 bg-[--color-panel]/60 px-8 py-2 font-mono text-[10px] uppercase tracking-[0.45em] text-[--color-amber]">
-          <span>⟶ Nº Processo</span>
-          <span>Objeto</span>
-          <span>Status</span>
-          <span className="text-right">Atualizado</span>
-        </div>
-      )}
-
-      {/* Page content */}
-      <main className="relative z-10 px-8 py-4">
-        {isLastUpdates ? (
-          <LastUpdatesPanel rows={recent} />
-        ) : (
-          <BoardPanel rows={visibleRows} />
-        )}
+      {/* Content */}
+      <main className="relative z-10 flex-1 overflow-hidden px-12 pt-6">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={pageIndex}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -14 }}
+            transition={TRANSITION}
+          >
+            {isLastUpdates ? (
+              <LastUpdatesPanel rows={recent} />
+            ) : (
+              <BoardPanel rows={currentPage ?? []} />
+            )}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
-      {/* Footer / pagination & ticker */}
-      <footer className="absolute inset-x-0 bottom-0 z-10 border-t border-[--color-panel-line]/60 bg-[--color-bg]/80 backdrop-blur-sm">
-        <div className="flex items-center justify-between gap-4 px-8 py-3">
-          <div className="flex items-center gap-4">
-            <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-[--color-ink-dim]">
-              Tela {String(pageIndex + 1).padStart(2, "0")} / {String(totalPages).padStart(2, "0")}
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-[--color-rule] bg-[--color-paper-soft]/80 px-12 py-4 backdrop-blur-sm">
+        <div className="flex items-center justify-between gap-6">
+          <div className="flex items-center gap-5">
+            <span className="label-eyebrow">
+              Tela{" "}
+              <span className="font-mono text-[--color-claret]">
+                {String(pageIndex + 1).padStart(2, "0")}
+              </span>{" "}
+              / {String(totalPages).padStart(2, "0")}
             </span>
-            <PageDots count={totalPages} active={pageIndex} />
+            <PageIndicator count={totalPages} active={pageIndex} />
           </div>
 
-          <div className="ticker-mask flex-1 overflow-hidden">
-            <div className="scroll-marquee flex gap-12 whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.3em] text-[--color-ink-dim]">
-              {Array.from({ length: 2 }).map((_, k) => (
-                <span key={k} className="flex items-center gap-12">
-                  <span>⟶ Painel oficial · transmissão contínua</span>
-                  <span className="text-[--color-amber]">●</span>
-                  <span>Total de processos: {processes.length}</span>
-                  <span className="text-[--color-amber]">●</span>
-                  <span>Atualização automática · supabase realtime</span>
-                  <span className="text-[--color-amber]">●</span>
-                  <span>Estação: telão público</span>
-                  <span className="text-[--color-amber]">●</span>
-                </span>
-              ))}
-            </div>
+          <div className="hidden items-center gap-8 md:flex">
+            <span className="label-eyebrow">
+              Total · <span className="text-[--color-ink] tabular">{processes.length}</span>
+            </span>
+            <span className="label-eyebrow">
+              {isLastUpdates ? "Sumário das últimas modificações" : "Listagem geral"}
+            </span>
           </div>
 
-          <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-[--color-ink-dim]">
-            BRT
+          <span className="label-eyebrow">
+            <span className="hidden sm:inline">Brasília · </span>BRT
           </span>
         </div>
       </footer>
@@ -177,134 +170,139 @@ export function Board({ initial }: { initial: Process[] }) {
   );
 }
 
-function BoardPanel({ rows }: { rows: (Process | null)[] }) {
-  if (rows.every((r) => r === null)) {
+function BoardPanel({ rows }: { rows: Process[] }) {
+  if (rows.length === 0) {
     return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
-        <div className="flex items-center gap-3">
-          <span className="pulse-led h-2.5 w-2.5 rounded-full bg-[--color-amber]" />
-          <span className="font-mono text-[11px] uppercase tracking-[0.45em] text-[--color-amber]">
-            ⟶ Aguardando dados
-          </span>
-        </div>
-        <h2 className="font-display text-7xl font-black uppercase text-[--color-cream]">
-          Nenhum processo ativo
+      <div className="flex min-h-[55vh] flex-col items-center justify-center gap-5 text-center">
+        <p className="label-eyebrow text-[--color-claret]">Aguardando registros</p>
+        <h2 className="headline text-6xl text-[--color-ink]">
+          Nenhum <em>processo</em> em acompanhamento.
         </h2>
-        <p className="font-serif text-2xl italic text-[--color-ink-dim]">
-          Os cadastros aparecem aqui em tempo real assim que forem registrados.
+        <p className="max-w-xl font-serif text-xl italic text-[--color-ink-dim]">
+          Os cadastros aparecem aqui em tempo real assim que forem registrados pelo painel administrativo.
         </p>
       </div>
     );
   }
 
+  // Pad to ROWS_PER_PAGE so layout doesn't jump
+  const padded: (Process | null)[] = Array.from(
+    { length: ROWS_PER_PAGE },
+    (_, i) => rows[i] ?? null,
+  );
+
   return (
-    <ul className="space-y-2 pb-20">
-      {rows.map((row, i) => (
-        <li
-          key={i}
-          className="row-enter grid grid-cols-[1.2fr_2.8fr_1.4fr_0.8fr] items-center gap-6 border-b border-[--color-panel-line]/40 bg-black/20 px-3 py-3"
-          style={{ animationDelay: `${i * 80}ms` }}
-        >
-          <FlapText
-            value={row?.numero ?? ""}
-            length={NUMERO_LEN}
-            size="md"
-            color="var(--color-cream)"
-          />
-          <FlapText
-            value={row?.objeto ?? ""}
-            length={OBJETO_LEN}
-            size="sm"
-            color="var(--color-ink)"
-            staggerMs={15}
-          />
-          <span className="flex items-center gap-3">
-            {row && (
-              <span
-                className="h-3 w-3 rounded-full"
-                style={{ background: row.cor, boxShadow: `0 0 14px ${row.cor}` }}
-              />
+    <div>
+      <div className="grid grid-cols-[200px_1fr_280px_140px] items-end gap-8 border-b border-[--color-ink] pb-2 text-[10px] font-medium uppercase tracking-[0.18em] text-[--color-ink-dim]">
+        <span>Nº Processo</span>
+        <span>Objeto</span>
+        <span>Status</span>
+        <span className="text-right">Atualizado</span>
+      </div>
+
+      <ul className="board-rows">
+        {padded.map((row, i) => (
+          <motion.li
+            key={i}
+            initial={{ opacity: 0, x: -12 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ ...TRANSITION, delay: 0.08 + i * 0.06 }}
+            className="grid grid-cols-[200px_1fr_280px_140px] items-center gap-8 py-5"
+          >
+            {row ? (
+              <>
+                <span className="font-mono text-base font-medium text-[--color-ink] tabular">
+                  {row.numero}
+                </span>
+                <span
+                  className="truncate font-serif text-2xl leading-snug text-[--color-ink]"
+                  title={row.objeto}
+                >
+                  {row.objeto}
+                </span>
+                <span className="flex items-center gap-3">
+                  <span className="color-chip" style={{ color: row.cor }} />
+                  <span
+                    className="truncate font-sans text-base font-medium uppercase tracking-wide"
+                    style={{ color: row.cor }}
+                  >
+                    {row.status}
+                  </span>
+                </span>
+                <span className="text-right font-mono text-xs uppercase tracking-wide text-[--color-ink-dim]">
+                  {formatRelative(row.updated_at)}
+                </span>
+              </>
+            ) : (
+              <span className="col-span-4 h-8" />
             )}
-            <FlapText
-              value={row?.status ?? ""}
-              length={STATUS_LEN}
-              size="md"
-              color={row?.cor ?? "var(--color-amber)"}
-              staggerMs={28}
-            />
-          </span>
-          <span className="text-right font-mono text-xs uppercase tracking-[0.2em] text-[--color-ink-dim]">
-            {row ? formatRelative(row.updated_at) : ""}
-          </span>
-        </li>
-      ))}
-    </ul>
+          </motion.li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
 function LastUpdatesPanel({ rows }: { rows: Process[] }) {
   return (
-    <div className="fade-in pb-24 pt-2">
-      <div className="mb-6 flex flex-col gap-2">
-        <p className="font-mono text-[11px] uppercase tracking-[0.45em] text-[--color-amber]">
-          ⟶ Tela final do ciclo
-        </p>
-        <h2 className="flex items-baseline gap-4 font-display text-6xl font-black uppercase leading-none text-[--color-cream] sm:text-7xl">
-          Últimas
-          <span className="font-serif italic font-normal text-[--color-amber]">atualizações</span>
+    <div>
+      <div className="mb-8 flex flex-col gap-3">
+        <p className="label-eyebrow text-[--color-claret]">Sumário do ciclo</p>
+        <h2 className="headline text-6xl text-[--color-ink] sm:text-7xl">
+          Últimas <em>atualizações</em>.
         </h2>
+        <p className="max-w-2xl font-serif text-xl italic text-[--color-ink-dim]">
+          As cinco modificações mais recentes — em ordem cronológica decrescente.
+        </p>
       </div>
 
       {rows.length === 0 ? (
-        <div className="border border-dashed border-[--color-panel-line] py-20 text-center">
+        <div className="border-y-2 border-double border-[--color-rule] py-20 text-center">
           <p className="font-serif text-2xl italic text-[--color-ink-dim]">
             Nenhuma modificação registrada ainda.
           </p>
         </div>
       ) : (
-        <ol className="space-y-3">
+        <ol className="border-t border-[--color-ink]">
           {rows.map((p, i) => (
-            <li
+            <motion.li
               key={p.id}
-              className="row-enter grid grid-cols-[60px_1.1fr_2.6fr_1.4fr_140px] items-center gap-5 border-l-4 bg-black/30 px-5 py-4"
-              style={{
-                animationDelay: `${i * 120}ms`,
-                borderColor: p.cor,
-              }}
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ ...TRANSITION, delay: 0.15 + i * 0.13 }}
+              className="grid grid-cols-[80px_220px_1fr_300px_160px] items-center gap-6 border-b border-[--color-rule-soft] py-5"
+              style={{ borderLeft: `4px solid ${p.cor}`, paddingLeft: "1.25rem" }}
             >
-              <span className="font-display text-4xl font-black text-[--color-amber]">
-                {String(i + 1).padStart(2, "0")}
+              <span className="font-serif text-4xl italic text-[--color-claret]">
+                {romanize(i + 1)}.
               </span>
-              <FlapText
-                value={p.numero}
-                length={NUMERO_LEN}
-                size="md"
-                color="var(--color-cream)"
-              />
-              <FlapText
-                value={p.objeto}
-                length={OBJETO_LEN}
-                size="sm"
-                color="var(--color-ink)"
-                staggerMs={12}
-              />
-              <span className="flex items-center gap-2">
+              <span className="font-mono text-base font-medium text-[--color-ink] tabular">
+                {p.numero}
+              </span>
+              <span
+                className="truncate font-serif text-2xl leading-snug text-[--color-ink]"
+                title={p.objeto}
+              >
+                {p.objeto}
+              </span>
+              <span className="flex items-center gap-3">
+                <span className="color-chip" style={{ color: p.cor }} />
                 <span
-                  className="h-2.5 w-2.5 rounded-full"
-                  style={{ background: p.cor, boxShadow: `0 0 12px ${p.cor}` }}
-                />
-                <FlapText
-                  value={p.status}
-                  length={STATUS_LEN}
-                  size="md"
-                  color={p.cor}
-                  staggerMs={22}
-                />
+                  className="truncate font-sans text-base font-medium uppercase tracking-wide"
+                  style={{ color: p.cor }}
+                >
+                  {p.status}
+                </span>
               </span>
-              <span className="text-right font-mono text-[10px] uppercase tracking-[0.3em] text-[--color-ink-dim]">
-                {formatFullDate(p.updated_at)}
+              <span className="text-right">
+                <div className="font-mono text-sm font-medium uppercase tracking-wide text-[--color-ink]">
+                  {formatRelative(p.updated_at)}
+                </div>
+                <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[--color-ink-mute]">
+                  {formatFullDate(p.updated_at)}
+                </div>
               </span>
-            </li>
+            </motion.li>
           ))}
         </ol>
       )}
@@ -312,14 +310,14 @@ function LastUpdatesPanel({ rows }: { rows: Process[] }) {
   );
 }
 
-function PageDots({ count, active }: { count: number; active: number }) {
+function PageIndicator({ count, active }: { count: number; active: number }) {
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1.5">
       {Array.from({ length: count }).map((_, i) => (
         <span
           key={i}
-          className={`h-1 transition-all ${
-            i === active ? "w-6 bg-[--color-amber]" : "w-3 bg-[--color-panel-line]"
+          className={`h-px transition-all ${
+            i === active ? "w-8 bg-[--color-claret]" : "w-3 bg-[--color-rule-strong]"
           }`}
         />
       ))}
@@ -331,19 +329,20 @@ function formatTime(d: Date) {
   return new Intl.DateTimeFormat("pt-BR", {
     hour: "2-digit",
     minute: "2-digit",
-    second: "2-digit",
     hour12: false,
-  }).format(d);
+  })
+    .format(d)
+    .replace(":", " : ");
 }
 
 function formatDate(d: Date) {
   const day = new Intl.DateTimeFormat("pt-BR", {
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
+    weekday: "long",
+    day: "numeric",
+    month: "long",
     year: "numeric",
   }).format(d);
-  return day.replace(/\./g, "").toUpperCase();
+  return day;
 }
 
 function formatFullDate(iso: string) {
@@ -364,4 +363,9 @@ function formatRelative(iso: string) {
   if (h < 24) return `${h} h`;
   const d = Math.round(h / 24);
   return `${d} d`;
+}
+
+function romanize(n: number) {
+  const map: Record<number, string> = { 1: "I", 2: "II", 3: "III", 4: "IV", 5: "V" };
+  return map[n] ?? String(n);
 }

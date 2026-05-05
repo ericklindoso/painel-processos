@@ -4,23 +4,27 @@ import { createProcess } from "../actions";
 
 export default function NewProcessPage() {
   return (
-    <div className="mx-auto max-w-7xl px-6 py-10 sm:px-10">
-      <header className="mb-10 border-b border-[--color-panel-line] pb-6">
+    <div className="mx-auto max-w-7xl px-6 py-12 sm:px-12">
+      <header className="mb-12 border-b border-[--color-rule] pb-6">
         <Link
           href="/admin"
-          className="font-mono text-[10px] uppercase tracking-[0.3em] text-[--color-ink-dim] hover:text-[--color-amber]"
+          className="label-eyebrow hover:text-[--color-claret]"
         >
-          ◀ voltar à lista
+          ← Voltar à lista
         </Link>
-        <h1 className="mt-3 font-display text-5xl font-black uppercase leading-none text-[--color-cream] sm:text-6xl">
-          Novo<span className="text-[--color-amber]">.</span>
+        <div className="mt-3 flex items-baseline gap-3">
+          <span className="font-serif text-3xl italic text-[--color-claret]">§</span>
+          <p className="label-eyebrow text-[--color-claret]">Novo registro</p>
+        </div>
+        <h1 className="headline mt-3 text-6xl text-[--color-ink] sm:text-7xl">
+          Cadastrar <em>processo</em>.
         </h1>
-        <p className="mt-2 max-w-lg font-serif text-lg italic text-[--color-ink-dim]">
-          Cadastre um novo processo. Ele aparece no telão imediatamente.
+        <p className="mt-3 max-w-xl font-serif text-lg italic text-[--color-ink-dim]">
+          O processo aparecerá no painel público imediatamente após salvar.
         </p>
       </header>
 
-      <ProcessForm action={createProcess} submitLabel="⟶ Cadastrar" />
+      <ProcessForm action={createProcess} submitLabel="Cadastrar processo" />
     </div>
   );
 }

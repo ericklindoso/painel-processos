@@ -19,46 +19,52 @@ export default async function AdminLayout({
     <div className="relative min-h-screen">
       <div className="pointer-events-none absolute inset-0 grain" />
 
-      <header className="sticky top-0 z-50 border-b border-[--color-panel-line] bg-[--color-bg]/85 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 sm:px-10">
-          <div className="flex items-center gap-6">
-            <Link href="/admin" className="group flex items-center gap-3">
-              <span className="pulse-led h-2 w-2 rounded-full bg-[--color-amber]" />
+      <header className="sticky top-0 z-50 border-b border-[--color-rule] bg-[--color-paper]/85 backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 sm:px-12">
+          <div className="flex items-center gap-8">
+            <Link href="/admin" className="group flex items-baseline gap-3">
+              <span className="font-serif text-2xl italic text-[--color-claret]">§</span>
               <div>
-                <div className="font-mono text-[10px] uppercase tracking-[0.4em] text-[--color-ink-dim] group-hover:text-[--color-amber]">
-                  Estação 01
+                <div className="label-eyebrow text-[--color-claret]">
+                  Painel · Administração
                 </div>
-                <div className="font-display text-xl font-black uppercase leading-none text-[--color-cream]">
-                  Painel · Admin
+                <div className="font-serif text-xl text-[--color-ink] group-hover:italic">
+                  Processos
                 </div>
               </div>
             </Link>
 
-            <nav className="hidden items-center gap-6 border-l border-[--color-panel-line] pl-6 md:flex">
+            <nav className="hidden items-center gap-7 border-l border-[--color-rule] pl-8 md:flex">
               <Link
                 href="/admin"
-                className="font-mono text-[11px] uppercase tracking-[0.25em] text-[--color-ink-dim] hover:text-[--color-amber]"
+                className="label-eyebrow hover:text-[--color-claret]"
               >
-                Processos
+                Lista
+              </Link>
+              <Link
+                href="/admin/new"
+                className="label-eyebrow hover:text-[--color-claret]"
+              >
+                Novo
               </Link>
               <Link
                 href="/dashboard"
                 target="_blank"
                 rel="noreferrer"
-                className="font-mono text-[11px] uppercase tracking-[0.25em] text-[--color-ink-dim] hover:text-[--color-amber]"
+                className="label-eyebrow hover:text-[--color-claret]"
               >
                 Telão ↗
               </Link>
             </nav>
           </div>
 
-          <div className="flex items-center gap-4">
-            <span className="hidden font-mono text-[10px] uppercase tracking-[0.3em] text-[--color-ink-dim] md:inline">
+          <div className="flex items-center gap-5">
+            <span className="hidden font-mono text-[11px] uppercase tracking-wide text-[--color-ink-dim] md:inline">
               {user.email}
             </span>
             <form action={signOut}>
-              <button type="submit" className="btn btn-ghost text-xs">
-                ⟶ Sair
+              <button type="submit" className="btn btn-text text-xs">
+                Sair
               </button>
             </form>
           </div>
@@ -67,13 +73,13 @@ export default async function AdminLayout({
 
       <main className="relative">{children}</main>
 
-      <footer className="border-t border-[--color-panel-line] py-6">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 sm:px-10">
-          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-[--color-ink-mute]">
-            Painel de Processos · Admin
+      <footer className="mt-16 border-t border-[--color-rule] py-6">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 sm:px-12">
+          <span className="label-eyebrow">
+            Painel de Processos &nbsp;·&nbsp; Documento eletrônico oficial
           </span>
-          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-[--color-ink-mute]">
-            ⟶ Mantenha o telão sempre aberto
+          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[--color-ink-mute]">
+            v1.1
           </span>
         </div>
       </footer>

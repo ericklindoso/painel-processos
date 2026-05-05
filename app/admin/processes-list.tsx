@@ -7,10 +7,10 @@ import { deleteProcess } from "./actions";
 
 export function ProcessesList({ processes }: { processes: Process[] }) {
   return (
-    <div className="overflow-hidden border border-[--color-panel-line]">
-      {/* Header row */}
-      <div className="grid grid-cols-[140px_1fr_180px_140px_140px] gap-4 border-b border-[--color-panel-line] bg-[--color-panel] px-5 py-3 font-mono text-[10px] uppercase tracking-[0.3em] text-[--color-ink-dim]">
-        <span>Nº</span>
+    <div>
+      {/* Heading row */}
+      <div className="grid grid-cols-[160px_1fr_220px_140px_120px] items-center gap-6 border-b border-[--color-ink] pb-3 text-[10px] font-medium uppercase tracking-[0.18em] text-[--color-ink-dim]">
+        <span>Nº Processo</span>
         <span>Objeto</span>
         <span>Status</span>
         <span>Atualizado</span>
@@ -18,15 +18,15 @@ export function ProcessesList({ processes }: { processes: Process[] }) {
       </div>
 
       <ul>
-        {processes.map((p, i) => (
-          <ProcessRow key={p.id} p={p} striped={i % 2 === 1} />
+        {processes.map((p) => (
+          <ProcessRow key={p.id} p={p} />
         ))}
       </ul>
     </div>
   );
 }
 
-function ProcessRow({ p, striped }: { p: Process; striped: boolean }) {
+function ProcessRow({ p }: { p: Process }) {
   const [pending, startTransition] = useTransition();
   const [confirming, setConfirming] = useState(false);
 
@@ -43,21 +43,18 @@ function ProcessRow({ p, striped }: { p: Process; striped: boolean }) {
 
   return (
     <li
-      className={`grid grid-cols-[140px_1fr_180px_140px_140px] items-center gap-4 border-b border-[--color-panel-line]/50 px-5 py-4 transition hover:bg-[--color-amber]/[0.04] ${
-        striped ? "bg-[--color-bg-elev]/30" : ""
-      } ${pending ? "opacity-40" : ""}`}
+      className={`group grid grid-cols-[160px_1fr_220px_140px_120px] items-center gap-6 border-b border-[--color-rule-soft] py-5 transition hover:bg-[--color-paper-soft] ${
+        pending ? "opacity-40" : ""
+      }`}
     >
-      <span className="truncate font-mono text-sm font-bold text-[--color-cream]">{p.numero}</span>
-      <span className="truncate text-sm text-[--color-ink]" title={p.objeto}>
+      <span className="truncate font-mono text-sm text-[--color-ink]">{p.numero}</span>
+      <span className="truncate font-serif text-lg leading-snug text-[--color-ink]" title={p.objeto}>
         {p.objeto}
       </span>
-      <span className="flex items-center gap-2">
+      <span className="flex items-center gap-2.5">
+        <span className="color-chip" style={{ color: p.cor }} />
         <span
-          className="inline-block h-2 w-2 rounded-full ring-1 ring-black/30"
-          style={{ background: p.cor }}
-        />
-        <span
-          className="truncate font-display text-base font-black uppercase tracking-wide"
+          className="truncate font-sans text-sm font-medium uppercase tracking-wide"
           style={{ color: p.cor }}
         >
           {p.status}
@@ -66,24 +63,19 @@ function ProcessRow({ p, striped }: { p: Process; striped: boolean }) {
       <span className="font-mono text-xs uppercase tracking-wide text-[--color-ink-dim]">
         {formatDate(p.updated_at)}
       </span>
-      <span className="flex items-center justify-end gap-2">
-        <Link
-          href={`/admin/${p.id}/edit`}
-          className="border border-[--color-panel-line] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-[--color-ink-dim] transition hover:border-[--color-amber] hover:text-[--color-amber]"
-        >
-          ✎ Editar
+      <span className="flex items-center justify-end gap-4">
+        <Link href={`/admin/${p.id}/edit`} className="btn btn-text text-xs">
+          Editar
         </Link>
         <button
           type="button"
           onClick={handleDelete}
           disabled={pending}
-          className={`px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.2em] transition ${
-            confirming
-              ? "bg-[--color-rust] text-[--color-cream]"
-              : "border border-[--color-rust]/30 text-[--color-rust]/80 hover:border-[--color-rust] hover:text-[--color-rust]"
+          className={`btn btn-danger text-xs ${
+            confirming ? "border-b border-[--color-claret] text-[--color-claret]" : ""
           }`}
         >
-          {confirming ? "⚠ Confirmar" : "⊗ Excluir"}
+          {confirming ? "Confirmar?" : "Excluir"}
         </button>
       </span>
     </li>

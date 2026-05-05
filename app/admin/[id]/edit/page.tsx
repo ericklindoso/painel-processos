@@ -24,33 +24,35 @@ export default async function EditProcessPage({
   const action = updateProcess.bind(null, id);
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-10 sm:px-10">
-      <header className="mb-10 border-b border-[--color-panel-line] pb-6">
+    <div className="mx-auto max-w-7xl px-6 py-12 sm:px-12">
+      <header className="mb-12 border-b border-[--color-rule] pb-6">
         <Link
           href="/admin"
-          className="font-mono text-[10px] uppercase tracking-[0.3em] text-[--color-ink-dim] hover:text-[--color-amber]"
+          className="label-eyebrow hover:text-[--color-claret]"
         >
-          ◀ voltar à lista
+          ← Voltar à lista
         </Link>
 
-        <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
+        <div className="mt-3 flex flex-wrap items-end justify-between gap-6">
           <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.4em] text-[--color-amber]">
-              ⟶ Edição
-            </p>
-            <h1 className="mt-1 font-display text-5xl font-black uppercase leading-none text-[--color-cream] sm:text-6xl">
-              <span className="font-serif italic font-normal text-[--color-cream]">{process.numero}</span>
-              <span className="text-[--color-amber]">.</span>
+            <p className="label-eyebrow text-[--color-claret]">Edição de registro</p>
+            <h1 className="headline mt-3 text-5xl text-[--color-ink] sm:text-6xl">
+              <em>Processo</em>{" "}
+              <span className="font-mono text-4xl text-[--color-ink-2] sm:text-5xl">
+                {process.numero}
+              </span>
             </h1>
           </div>
-          <div className="text-right font-mono text-[10px] uppercase tracking-[0.3em] text-[--color-ink-dim]">
-            <div>Cadastrado: {fmt(process.created_at)}</div>
-            <div>Atualizado: {fmt(process.updated_at)}</div>
-          </div>
+          <dl className="grid grid-cols-2 gap-x-8 gap-y-1 font-mono text-[10px] uppercase tracking-[0.15em] text-[--color-ink-dim]">
+            <dt>Cadastrado</dt>
+            <dd className="text-right text-[--color-ink-2]">{fmt(process.created_at)}</dd>
+            <dt>Atualizado</dt>
+            <dd className="text-right text-[--color-ink-2]">{fmt(process.updated_at)}</dd>
+          </dl>
         </div>
       </header>
 
-      <ProcessForm initial={process} action={action} submitLabel="⟶ Salvar alterações" />
+      <ProcessForm initial={process} action={action} submitLabel="Salvar alterações" />
     </div>
   );
 }
