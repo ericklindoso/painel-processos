@@ -33,7 +33,7 @@ export default function Home() {
             </p>
 
             <h1
-              className="reveal-up headline mt-8 text-[clamp(3.2rem,9.5vw,8.5rem)] text-[--color-ink]"
+              className="reveal-up headline mt-8 text-[clamp(3.2rem,9.5vw,5.5rem)] text-[--color-ink]"
               style={{ animationDelay: "120ms" }}
             >
               Acompanhamento de

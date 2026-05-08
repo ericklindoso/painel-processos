@@ -27,9 +27,11 @@ export async function createProcess(formData: FormData) {
     return { ok: false as const, error: "Preencha número, objeto e status." };
   }
 
-  const { error } = await supabase
+  const { data: inserted, error } = await supabase
     .from("processes")
-    .insert({ numero, objeto, status, cor });
+    .insert({ numero, objeto, status, cor })
+    .select("id")
+    .single();
 
   if (error) {
     if (error.code === "23505") {
@@ -37,6 +39,18 @@ export async function createProcess(formData: FormData) {
     }
     return { ok: false as const, error: error.message };
   }
+
+  await supabase.from("process_events").insert({
+    process_id: inserted.id,
+    process_numero: numero,
+    process_objeto: objeto,
+    event_type: "created",
+    actor_email: user.email ?? null,
+    old_status: null,
+    new_status: status,
+    old_cor: null,
+    new_cor: cor,
+  });
 
   revalidatePath("/admin");
   revalidatePath("/dashboard");
@@ -59,6 +73,12 @@ export async function updateProcess(id: string, formData: FormData) {
     return { ok: false as const, error: "Preencha número, objeto e status." };
   }
 
+  const { data: current } = await supabase
+    .from("processes")
+    .select("status, cor")
+    .eq("id", id)
+    .single();
+
   const { error } = await supabase
     .from("processes")
     .update({ numero, objeto, status, cor })
@@ -70,6 +90,19 @@ export async function updateProcess(id: string, formData: FormData) {
     }
     return { ok: false as const, error: error.message };
   }
+
+  const eventType = current?.status !== status ? "status_changed" : "updated";
+  await supabase.from("process_events").insert({
+    process_id: id,
+    process_numero: numero,
+    process_objeto: objeto,
+    event_type: eventType,
+    actor_email: user.email ?? null,
+    old_status: current?.status ?? null,
+    new_status: status,
+    old_cor: current?.cor ?? null,
+    new_cor: cor,
+  });
 
   revalidatePath("/admin");
   revalidatePath("/dashboard");
@@ -83,8 +116,26 @@ export async function deleteProcess(id: string) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  const { data: proc } = await supabase
+    .from("processes")
+    .select("numero, objeto, status, cor")
+    .eq("id", id)
+    .single();
+
   const { error } = await supabase.from("processes").delete().eq("id", id);
   if (error) return { ok: false as const, error: error.message };
+
+  await supabase.from("process_events").insert({
+    process_id: null,
+    process_numero: proc?.numero ?? "—",
+    process_objeto: proc?.objeto ?? "—",
+    event_type: "deleted",
+    actor_email: user.email ?? null,
+    old_status: proc?.status ?? null,
+    new_status: null,
+    old_cor: proc?.cor ?? null,
+    new_cor: null,
+  });
 
   revalidatePath("/admin");
   revalidatePath("/dashboard");

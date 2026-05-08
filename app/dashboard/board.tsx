@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
-import type { Process } from "@/lib/types";
+import type { Process, ProcessEvent, ProcessEventType } from "@/lib/types";
 
 const ROWS_PER_PAGE = 6;
 const PAGE_DURATION_MS = 7500;
@@ -11,8 +11,22 @@ const LAST_UPDATES_DURATION_MS = 10000;
 
 const TRANSITION = { duration: 0.7, ease: [0.2, 0.8, 0.2, 1] as const };
 
-export function Board({ initial }: { initial: Process[] }) {
+const EVENT_LABELS: Record<ProcessEventType, string> = {
+  created: "criação",
+  status_changed: "mudança de status",
+  updated: "atualização",
+  deleted: "remoção",
+};
+
+export function Board({
+  initial,
+  initialEvents,
+}: {
+  initial: Process[];
+  initialEvents: ProcessEvent[];
+}) {
   const [processes, setProcesses] = useState<Process[]>(initial);
+  const [events, setEvents] = useState<ProcessEvent[]>(initialEvents);
   const [pageIndex, setPageIndex] = useState(0);
   const [now, setNow] = useState<Date | null>(null);
 
@@ -23,7 +37,7 @@ export function Board({ initial }: { initial: Process[] }) {
     return () => clearInterval(id);
   }, []);
 
-  // Realtime subscription
+  // Realtime: processes
   useEffect(() => {
     const supabase = createClient();
     const channel = supabase
@@ -40,7 +54,29 @@ export function Board({ initial }: { initial: Process[] }) {
         },
       )
       .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, []);
 
+  // Realtime: events
+  useEffect(() => {
+    const supabase = createClient();
+    const channel = supabase
+      .channel("dashboard-events")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "process_events" },
+        async () => {
+          const { data } = await supabase
+            .from("process_events")
+            .select("*")
+            .order("created_at", { ascending: false })
+            .limit(10);
+          if (data) setEvents(data as ProcessEvent[]);
+        },
+      )
+      .subscribe();
     return () => {
       void supabase.removeChannel(channel);
     };
@@ -48,14 +84,6 @@ export function Board({ initial }: { initial: Process[] }) {
 
   const boardSorted = useMemo(
     () => [...processes].sort((a, b) => a.numero.localeCompare(b.numero)),
-    [processes],
-  );
-
-  const recent = useMemo(
-    () =>
-      [...processes]
-        .sort((a, b) => +new Date(b.updated_at) - +new Date(a.updated_at))
-        .slice(0, 5),
     [processes],
   );
 
@@ -130,7 +158,7 @@ export function Board({ initial }: { initial: Process[] }) {
             transition={TRANSITION}
           >
             {isLastUpdates ? (
-              <LastUpdatesPanel rows={recent} />
+              <LastUpdatesPanel events={events} />
             ) : (
               <BoardPanel rows={currentPage ?? []} />
             )}
@@ -179,13 +207,13 @@ function BoardPanel({ rows }: { rows: Process[] }) {
           Nenhum <em>processo</em> em acompanhamento.
         </h2>
         <p className="max-w-xl font-serif text-xl italic text-[--color-ink-dim]">
-          Os cadastros aparecem aqui em tempo real assim que forem registrados pelo painel administrativo.
+          Os cadastros aparecem aqui em tempo real assim que forem registrados pelo painel
+          administrativo.
         </p>
       </div>
     );
   }
 
-  // Pad to ROWS_PER_PAGE so layout doesn't jump
   const padded: (Process | null)[] = Array.from(
     { length: ROWS_PER_PAGE },
     (_, i) => rows[i] ?? null,
@@ -193,7 +221,7 @@ function BoardPanel({ rows }: { rows: Process[] }) {
 
   return (
     <div>
-      <div className="grid grid-cols-[200px_1fr_280px_140px] items-end gap-8 border-b border-[--color-ink] pb-2 text-[10px] font-medium uppercase tracking-[0.18em] text-[--color-ink-dim]">
+      <div className="grid grid-cols-[200px_1fr_360px_140px] items-end gap-8 border-b border-[--color-ink] pb-2 text-[10px] font-medium uppercase tracking-[0.18em] text-[--color-ink-dim]">
         <span>Nº Processo</span>
         <span>Objeto</span>
         <span>Status</span>
@@ -207,15 +235,15 @@ function BoardPanel({ rows }: { rows: Process[] }) {
             initial={{ opacity: 0, x: -12 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ ...TRANSITION, delay: 0.08 + i * 0.06 }}
-            className="grid grid-cols-[200px_1fr_280px_140px] items-center gap-8 py-5"
+            className="grid grid-cols-[200px_1fr_360px_140px] items-center gap-8 py-5"
           >
             {row ? (
               <>
-                <span className="font-mono text-base font-medium text-[--color-ink] tabular">
+                <span className="font-mono text-lg font-medium text-[--color-ink] tabular">
                   {row.numero}
                 </span>
                 <span
-                  className="truncate font-serif text-2xl leading-snug text-[--color-ink]"
+                  className="truncate font-serif text-3xl leading-snug text-[--color-ink]"
                   title={row.objeto}
                 >
                   {row.objeto}
@@ -223,13 +251,13 @@ function BoardPanel({ rows }: { rows: Process[] }) {
                 <span className="flex items-center gap-3">
                   <span className="color-chip" style={{ color: row.cor }} />
                   <span
-                    className="truncate font-sans text-base font-medium uppercase tracking-wide"
+                    className="truncate font-sans text-lg font-medium uppercase tracking-wide"
                     style={{ color: row.cor }}
                   >
                     {row.status}
                   </span>
                 </span>
-                <span className="text-right font-mono text-xs uppercase tracking-wide text-[--color-ink-dim]">
+                <span className="text-right font-mono text-sm uppercase tracking-wide text-[--color-ink-dim]">
                   {formatRelative(row.updated_at)}
                 </span>
               </>
@@ -243,7 +271,77 @@ function BoardPanel({ rows }: { rows: Process[] }) {
   );
 }
 
-function LastUpdatesPanel({ rows }: { rows: Process[] }) {
+function StatusPill({ status, cor }: { status: string; cor?: string | null }) {
+  if (cor) {
+    return (
+      <span
+        className="inline-flex items-center gap-1.5 rounded border px-2 py-0.5 font-sans text-sm font-medium uppercase tracking-wide"
+        style={{
+          color: cor,
+          backgroundColor: `${cor}18`,
+          borderColor: `${cor}40`,
+        }}
+      >
+        <span
+          className="h-1.5 w-1.5 flex-none rounded-full"
+          style={{ backgroundColor: cor }}
+        />
+        {status}
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center rounded border border-[--color-rule] bg-[--color-paper-warm] px-2 py-0.5 font-sans text-sm font-medium uppercase tracking-wide text-[--color-ink-dim]">
+      {status}
+    </span>
+  );
+}
+
+function buildNarrative(event: ProcessEvent) {
+  const numEl = (
+    <span className="font-mono font-medium text-[--color-ink]">{event.process_numero}</span>
+  );
+  const obj =
+    event.process_objeto.length > 80
+      ? event.process_objeto.slice(0, 80) + "…"
+      : event.process_objeto;
+
+  switch (event.event_type) {
+    case "created":
+      return (
+        <>
+          Processo {numEl} cadastrado. Status inicial:{" "}
+          <StatusPill status={event.new_status ?? "—"} cor={event.new_cor} />.
+        </>
+      );
+    case "status_changed":
+      return (
+        <>
+          O processo {numEl} — {obj} — teve seu status alterado de{" "}
+          <StatusPill status={event.old_status ?? "—"} /> para{" "}
+          <StatusPill status={event.new_status ?? "—"} cor={event.new_cor} />.
+        </>
+      );
+    case "updated":
+      return <>Os dados do processo {numEl} foram atualizados.</>;
+    case "deleted":
+      return (
+        <>
+          O processo {numEl} — {obj} — foi removido do sistema.
+        </>
+      );
+  }
+}
+
+function actorDisplay(email: string): string {
+  const [local, domain] = email.split("@");
+  const org = domain?.split(".")[0] ?? "";
+  return org ? `${local} (${org.toUpperCase()})` : local;
+}
+
+function LastUpdatesPanel({ events }: { events: ProcessEvent[] }) {
+  const shown = events.slice(0, 5);
+
   return (
     <div>
       <div className="mb-8 flex flex-col gap-3">
@@ -256,55 +354,65 @@ function LastUpdatesPanel({ rows }: { rows: Process[] }) {
         </p>
       </div>
 
-      {rows.length === 0 ? (
+      {shown.length === 0 ? (
         <div className="border-y-2 border-double border-[--color-rule] py-20 text-center">
           <p className="font-serif text-2xl italic text-[--color-ink-dim]">
             Nenhuma modificação registrada ainda.
           </p>
         </div>
       ) : (
-        <ol className="border-t border-[--color-ink]">
-          {rows.map((p, i) => (
-            <motion.li
-              key={p.id}
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ ...TRANSITION, delay: 0.15 + i * 0.13 }}
-              className="grid grid-cols-[80px_220px_1fr_300px_160px] items-center gap-6 border-b border-[--color-rule-soft] py-5"
-              style={{ borderLeft: `4px solid ${p.cor}`, paddingLeft: "1.25rem" }}
-            >
-              <span className="font-serif text-4xl italic text-[--color-claret]">
-                {romanize(i + 1)}.
-              </span>
-              <span className="font-mono text-base font-medium text-[--color-ink] tabular">
-                {p.numero}
-              </span>
-              <span
-                className="truncate font-serif text-2xl leading-snug text-[--color-ink]"
-                title={p.objeto}
+        <>
+          <ol className="border-t border-[--color-ink]">
+            {shown.map((ev, i) => (
+              <motion.li
+                key={ev.id}
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ ...TRANSITION, delay: 0.15 + i * 0.13 }}
+                className="grid grid-cols-[80px_1fr_200px] items-start gap-8 border-b border-[--color-rule-soft] py-6"
               >
-                {p.objeto}
-              </span>
-              <span className="flex items-center gap-3">
-                <span className="color-chip" style={{ color: p.cor }} />
-                <span
-                  className="truncate font-sans text-base font-medium uppercase tracking-wide"
-                  style={{ color: p.cor }}
-                >
-                  {p.status}
-                </span>
-              </span>
-              <span className="text-right">
-                <div className="font-mono text-sm font-medium uppercase tracking-wide text-[--color-ink]">
-                  {formatRelative(p.updated_at)}
+                {/* Index + tempo relativo */}
+                <div className="flex flex-col gap-1 pt-1">
+                  <span className="font-serif text-4xl italic text-[--color-claret]">
+                    {romanize(i + 1)}.
+                  </span>
+                  <span className="label-eyebrow text-[--color-ink-mute]">
+                    {formatRelative(ev.created_at)}
+                  </span>
                 </div>
-                <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[--color-ink-mute]">
-                  {formatFullDate(p.updated_at)}
+
+                {/* Narrativa */}
+                <div className="flex flex-col gap-3">
+                  <p className="font-serif text-2xl leading-relaxed text-[--color-ink]">
+                    {buildNarrative(ev)}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[--color-ink-mute]">
+                    <span>{formatFullDate(ev.created_at)}</span>
+                    {ev.actor_email && (
+                      <>
+                        <span>·</span>
+                        <span>por {actorDisplay(ev.actor_email)}</span>
+                      </>
+                    )}
+                  </div>
                 </div>
-              </span>
-            </motion.li>
-          ))}
-        </ol>
+
+                {/* Badge de tipo */}
+                <div className="flex justify-end pt-2">
+                  <span className="label-eyebrow rounded border border-[--color-rule] px-3 py-1 text-[--color-ink-dim]">
+                    □ {EVENT_LABELS[ev.event_type]}
+                  </span>
+                </div>
+              </motion.li>
+            ))}
+          </ol>
+
+          {events.length > 0 && (
+            <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.2em] text-[--color-ink-mute]">
+              {Math.min(shown.length, 5)} de {events.length} atualizações no ciclo atual.
+            </p>
+          )}
+        </>
       )}
     </div>
   );
@@ -336,19 +444,19 @@ function formatTime(d: Date) {
 }
 
 function formatDate(d: Date) {
-  const day = new Intl.DateTimeFormat("pt-BR", {
+  return new Intl.DateTimeFormat("pt-BR", {
     weekday: "long",
     day: "numeric",
     month: "long",
     year: "numeric",
   }).format(d);
-  return day;
 }
 
 function formatFullDate(iso: string) {
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "2-digit",
+    year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(iso));
