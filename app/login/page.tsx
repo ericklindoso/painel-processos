@@ -60,7 +60,7 @@ export default function LoginPage() {
               Entrar.
             </h2>
             <p className="mt-3 font-serif text-lg italic text-[--color-ink-dim]">
-              Use suas credenciais administrativas.
+              Use seu nome de usuário e senha.
             </p>
           </div>
 
