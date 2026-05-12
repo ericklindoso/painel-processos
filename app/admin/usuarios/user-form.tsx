@@ -15,7 +15,14 @@ export function UserForm() {
     setLoading(true);
     try {
       const result = await createUser(new FormData(e.currentTarget));
-      if (result?.error) setError(result.error);
+      if ("error" in result) {
+        setError(result.error);
+      } else {
+        router.push("/admin/usuarios");
+        router.refresh();
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro inesperado.");
     } finally {
       setLoading(false);
     }

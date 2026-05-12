@@ -1,7 +1,6 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 const SUPABASE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "")
@@ -26,7 +25,7 @@ async function listAllUsers() {
 
 export async function createUser(
   formData: FormData,
-): Promise<{ error: string } | void> {
+): Promise<{ error: string } | { success: true }> {
   const username = (formData.get("username") as string)?.trim();
   const email = (formData.get("email") as string)?.trim();
   const password = formData.get("password") as string;
@@ -62,7 +61,7 @@ export async function createUser(
   }
 
   revalidatePath("/admin/usuarios");
-  redirect("/admin/usuarios");
+  return { success: true };
 }
 
 export async function deleteUser(userId: string): Promise<{ error?: string }> {
