@@ -2,94 +2,61 @@ import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
   "https://inbcgaoexhnrcjqrqtsc.supabase.co",
-  "sb_publishable_3aSOIWb4U10Oxt0bGIu9iQ_Bl-Drgmj"
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
+// Cores por status
+const COR_ANALISE = "#1E3A5F";      // Marinho — em análise
+const COR_AGUARDANDO = "#92400E";   // Bronze — aguardando
+
 const processes = [
-  {
-    numero: "2024.00137.00001",
-    objeto:
-      "Contratação de empresa de engenharia para execução da obra de implantação de sistemas de abastecimento de água em comunidades rurais no município de Água Doce do Maranhão/MA, incluindo fornecimento de materiais, mão de obra, equipamentos e serviços correlatos, com recursos do Termo de Compromisso nº 967148/2024/MCIDADES/CAIXA firmado com a Secretaria de Estado de Governo",
-    status: "Aguardando Assinatura do Secretário",
-    cor: "#7C3D52",
-  },
-  {
-    numero: "2024.00214.00003",
-    objeto:
-      "Aquisição de equipamentos de informática e mobiliário para modernização das unidades de atendimento ao cidadão da Secretaria de Administração, compreendendo computadores, monitores, impressoras multifuncionais, mesas e cadeiras ergonômicas, conforme especificações técnicas constantes no Termo de Referência",
-    status: "Em Análise Jurídica",
-    cor: "#1D4ED8",
-  },
-  {
-    numero: "2025.00089.00002",
-    objeto:
-      "Contratação de serviços de manutenção preventiva e corretiva da frota de veículos leves e pesados pertencentes ao patrimônio da Secretaria de Saúde, com fornecimento de peças genuínas ou originais, pelo período de 12 (doze) meses, conforme condições e exigências estabelecidas neste instrumento",
-    status: "Publicado no Diário Oficial",
-    cor: "#065F46",
-  },
-  {
-    numero: "2025.00301.00007",
-    objeto:
-      "Contratação de empresa especializada para prestação de serviços de limpeza, conservação e higienização das instalações prediais da sede da Prefeitura Municipal e demais órgãos vinculados, com fornecimento de materiais, equipamentos e uniformes, pelo período de 24 (vinte e quatro) meses",
-    status: "Aguardando Parecer Técnico",
-    cor: "#92400E",
-  },
-  {
-    numero: "2025.00445.00001",
-    objeto:
-      "Elaboração de projeto executivo e execução de obra de pavimentação asfáltica com drenagem pluvial nas Ruas XV de Novembro, Tiradentes e Marechal Deodoro, no bairro Centro, totalizando aproximadamente 4.200 m² de área pavimentada, incluindo sinalização horizontal e vertical",
-    status: "Em Licitação",
-    cor: "#1E3A5F",
-  },
-  {
-    numero: "2025.00512.00004",
-    objeto:
-      "Aquisição de medicamentos, insumos farmacêuticos e materiais médico-hospitalares para abastecimento das Unidades Básicas de Saúde e do Hospital Municipal, conforme programação anual da Secretaria Municipal de Saúde e relação de itens aprovada pela Comissão de Farmácia e Terapêutica",
-    status: "Contrato Assinado",
-    cor: "#065F46",
-  },
-  {
-    numero: "2025.00678.00002",
-    objeto:
-      "Contratação de empresa especializada em tecnologia da informação para desenvolvimento, implantação e manutenção de sistema integrado de gestão municipal (ERP) contemplando os módulos de contabilidade pública, folha de pagamento, tributos, almoxarifado, patrimônio e portal de transparência",
-    status: "Em Execução",
-    cor: "#1D4ED8",
-  },
-  {
-    numero: "2025.00734.00005",
-    objeto:
-      "Contratação de empresa para execução de obra de reforma e ampliação da Escola Municipal Professora Maria das Dores, localizada na Rua das Acácias, nº 150, Bairro Novo Horizonte, com área de intervenção de 1.850 m², incluindo adaptação para acessibilidade conforme NBR 9050",
-    status: "Aguardando Homologação",
-    cor: "#7C3D52",
-  },
-  {
-    numero: "2025.00891.00001",
-    objeto:
-      "Prestação de serviços de vigilância patrimonial ostensiva, desarmada e armada, nas dependências dos prédios públicos municipais durante o período de 24 (vinte e quatro) meses, com fornecimento de uniformes, equipamentos de comunicação e demais materiais necessários à execução dos serviços",
-    status: "Suspenso por Decisão Judicial",
-    cor: "#DC2626",
-  },
-  {
-    numero: "2026.00023.00001",
-    objeto:
-      "Aquisição de gêneros alimentícios para atendimento ao Programa Nacional de Alimentação Escolar (PNAE) destinados aos alunos da rede municipal de ensino, compreendendo produtos da agricultura familiar e da alimentação escolar, conforme cardápio aprovado pela nutricionista responsável",
-    status: "Em Instrução Processual",
-    cor: "#92400E",
-  },
-  {
-    numero: "2026.00105.00003",
-    objeto:
-      "Contratação de serviços de assessoria técnica e consultoria em gestão ambiental para apoio à implementação do Plano Municipal de Saneamento Básico, incluindo elaboração de estudos, diagnósticos, relatórios e participação em audiências públicas, pelo período de 18 (dezoito) meses",
-    status: "Aguardando Publicação",
-    cor: "#1E3A5F",
-  },
-  {
-    numero: "2026.00198.00002",
-    objeto:
-      "Registro de preços para eventual aquisição de combustíveis (gasolina comum, etanol hidratado e óleo diesel S-10) para abastecimento da frota oficial de veículos pertencentes a todos os órgãos e entidades da administração pública municipal, pelo período de 12 (doze) meses",
-    status: "Em Análise pela Controladoria",
-    cor: "#065F46",
-  },
+  { numero: "202511012403320", objeto: "VOÇOROCA 9 MILHÕES",                                                     status: "EM ANÁLISE DE HABILITAÇÃO",       cor: COR_ANALISE },
+  { numero: "202511012404929", objeto: "VOÇOROCA 38 MILHÕES",                                                    status: "EM ANÁLISE DE HABILITAÇÃO",       cor: COR_ANALISE },
+  { numero: "202511012406228", objeto: "SAA DE ÁGUA DOCE DO MARANHÃO",                                           status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012405521", objeto: "SAA CONCEIÇÃO DO LAGO AÇU",                                              status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012404930", objeto: "SAA DE PEDRO DO ROSÁRIO",                                                status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012405528", objeto: "SAA DE FERNANDO FALCÃO",                                                 status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012405988", objeto: "SAA AMARANTE",                                                           status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012405599", objeto: "SAA SATUBINHA",                                                          status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012405557", objeto: "SAA DE SÃO JOÃO DO SOTER",                                              status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012405558", objeto: "SAA LAGOA GRANDE DO MARANHÃO",                                          status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012405716", objeto: "SAA SÃO JOÃO DO CARU",                                                  status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012405717", objeto: "SAA CENTRO NOVO DO MARANHÃO",                                           status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012405943", objeto: "SAA SANTO AMARO DO MARANHÃO",                                           status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012405944", objeto: "SAA SANTANA DO MARANHÃO",                                               status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012405945", objeto: "SAA BELÁGUA",                                                           status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012405715", objeto: "SAA GOVERNADOR EUGÊNIO BARROS",                                         status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012406156", objeto: "SAA PINHEIRO",                                                          status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012406157", objeto: "SAA PAULO RAMOS",                                                       status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012406221", objeto: "SAA URBANO PAULINO NEVES",                                              status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012406210", objeto: "SAA OLHO D'ÁGUA DAS CUNHÃS",                                           status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012406255", objeto: "SAA FORTALEZA DOS NOGUEIRAS",                                           status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012406212", objeto: "SAA FEIRA NOVA DO MARANHÃO",                                            status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "20261112400009",  objeto: "SAA CHAPADINHA",                                                        status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012406213", objeto: "SAA PIRAPEMAS",                                                         status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012406348", objeto: "SAA FORTUNA",                                                           status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012406292", objeto: "SAA GOVERNADOR ARCHER",                                                 status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012406281", objeto: "SAA ICATU",                                                             status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "20261112400032",  objeto: "SAA MIRADOR",                                                           status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "20261112400064",  objeto: "SAA LUIS DOMINGUES",                                                    status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "20261112400033",  objeto: "SAA LAGO VERDE",                                                        status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "20261112400115",  objeto: "SAA GOVERNADOR LUÍS ROCHA",                                             status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "20261112400036",  objeto: "SAA MORROS",                                                            status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "20261112400037",  objeto: "SAA POÇÃO DE PEDRAS",                                                   status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "20261112400038",  objeto: "SAA TUTÓIA",                                                            status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012403356", objeto: "SAA SIMPLIFICADO",                                                      status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012405942", objeto: "SAA SIMPLIFICADO (BARRA DO CORDA, LAGO DO JUNCO, PINHEIRO E ARAIOSES)", status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012406152", objeto: "TRATAMENTO DE LODO DO ITAQUI",                                          status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012403289", objeto: "CONVENTO DAS MERCÊS",                                                   status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "20261112401637",  objeto: "SAA COROATÁ",                                                           status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "20261112401847",  objeto: "SAA ITAPECURU MIRIM",                                                   status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "20261112401835",  objeto: "SAA MIRANDA DO NORTE",                                                  status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "20261112401848",  objeto: "SES ITAPECURU MIRIM",                                                   status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "20261112401644",  objeto: "SAA BARREIRINHAS",                                                      status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "20261112401680",  objeto: "SES BARREIRINHAS",                                                      status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "20261112401356",  objeto: "SAA SÃO LUÍS",                                                         status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "20261112400163",  objeto: "SAA SÃO LUÍS - SACAVÉM",                                               status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
+  { numero: "202511012405529", objeto: "SAA IMPERATRIZ",                                                        status: "AGUARDANDO ABERTURA DE SESSÃO",   cor: COR_AGUARDANDO },
 ];
 
 async function seed() {
