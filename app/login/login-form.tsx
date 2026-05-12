@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { signInWithUsername } from "./actions";
 
 export function LoginForm() {
+  const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -15,7 +17,14 @@ export function LoginForm() {
     setLoading(true);
     try {
       const result = await signInWithUsername(username.trim(), password);
-      if (result?.error) setError(result.error);
+      if ("error" in result) {
+        setError(result.error);
+      } else {
+        router.push("/admin");
+        router.refresh();
+      }
+    } catch {
+      setError("Erro inesperado. Tente novamente.");
     } finally {
       setLoading(false);
     }

@@ -1,12 +1,11 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 
 export async function signInWithUsername(
   username: string,
   password: string,
-): Promise<{ error: string }> {
+): Promise<{ error: string } | { success: true }> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -43,5 +42,5 @@ export async function signInWithUsername(
     return { error: error.message };
   }
 
-  redirect("/admin");
+  return { success: true };
 }
