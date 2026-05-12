@@ -9,8 +9,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Usuário obrigatório." }, { status: 400 });
     }
 
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    // Remove BOM e whitespace de envs (algumas formas de upload no Vercel adicionam BOM)
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.replace(/^﻿/, "").trim();
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/^﻿/, "").trim();
 
     if (!serviceKey || !supabaseUrl) {
       return NextResponse.json({ error: "Configuração ausente." }, { status: 500 });

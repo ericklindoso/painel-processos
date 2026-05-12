@@ -4,10 +4,14 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SUPABASE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "")
+  .replace(/^﻿/, "")
+  .trim();
 
 function adminHeaders() {
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+  const key = (process.env.SUPABASE_SERVICE_ROLE_KEY ?? "")
+    .replace(/^﻿/, "")
+    .trim();
   return { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" };
 }
 
