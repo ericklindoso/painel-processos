@@ -13,9 +13,6 @@ export default function Home() {
             <span className="label-eyebrow">Painel de Processos</span>
           </div>
           <nav className="hidden items-center gap-8 sm:flex">
-            <Link href="/admin" className="label-eyebrow hover:text-[--color-claret]">
-              Administração
-            </Link>
             <Link href="/dashboard" className="label-eyebrow hover:text-[--color-claret]">
               Painel Telão
             </Link>
@@ -88,37 +85,16 @@ export default function Home() {
           </aside>
         </section>
 
-        {/* Three-pane info */}
-        <section className="grid grid-cols-1 gap-px border-t border-[--color-rule] sm:grid-cols-3">
-          {[
-            {
-              num: "I",
-              title: "Cadastro",
-              body: "Número único, objeto, status em caixa alta — com cor associada para destaque visual.",
-            },
-            {
-              num: "II",
-              title: "Painel público",
-              body: "Rotação automática de processos, sem intervenção. URL exclusiva: /dashboard.",
-            },
-            {
-              num: "III",
-              title: "Tempo real",
-              body: "Atualizações instantâneas. Cada modificação reflete-se imediatamente no painel.",
-            },
-          ].map((card, i) => (
-            <article
-              key={card.num}
-              className="reveal-up flex flex-col gap-3 border-r border-[--color-rule] py-8 pr-6 last:border-r-0 sm:py-10"
-              style={{ animationDelay: `${360 + i * 90}ms` }}
-            >
-              <span className="font-serif text-3xl italic text-[--color-claret]">{card.num}.</span>
-              <h3 className="font-serif text-3xl font-medium text-[--color-ink]">
-                {card.title}
-              </h3>
-              <p className="text-base leading-relaxed text-[--color-ink-dim]">{card.body}</p>
-            </article>
-          ))}
+        {/* Quote */}
+        <section className="border-t border-[--color-rule] py-10">
+          <blockquote className="max-w-2xl border-l-2 border-[--color-claret] pl-8">
+            <p className="font-serif text-2xl italic leading-snug text-[--color-ink]">
+              "Se você fracassar em planejar, planeja-se para o fracasso."
+            </p>
+            <footer className="mt-4 label-eyebrow text-[--color-claret]">
+              — Ronny Charles
+            </footer>
+          </blockquote>
         </section>
 
         {/* Footer */}
