@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signInWithUsername } from "./actions";
+import { createClient } from "@/lib/supabase/client";
+import { lookupEmail } from "./actions";
 
 export function LoginForm() {
   const router = useRouter();
@@ -15,16 +16,36 @@ export function LoginForm() {
     e.preventDefault();
     setError(null);
     setLoading(true);
+
     try {
-      const result = await signInWithUsername(username.trim(), password);
-      if ("error" in result) {
-        setError(result.error);
-      } else {
-        router.push("/admin");
-        router.refresh();
+      // Server action: busca o email pelo username (chave secreta fica no servidor)
+      const lookup = await lookupEmail(username.trim());
+      if ("error" in lookup) {
+        setError(lookup.error);
+        return;
       }
+
+      // Autenticação no cliente (igual ao fluxo original do Supabase)
+      const supabase = createClient();
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: lookup.email,
+        password,
+      });
+
+      if (authError) {
+        const m = authError.message.toLowerCase();
+        setError(
+          m.includes("invalid")
+            ? "Usuário ou senha incorretos."
+            : authError.message,
+        );
+        return;
+      }
+
+      router.push("/admin");
+      router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(err instanceof Error ? err.message : "Erro inesperado.");
     } finally {
       setLoading(false);
     }

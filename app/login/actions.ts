@@ -1,13 +1,10 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
-
-export async function signInWithUsername(
+export async function lookupEmail(
   username: string,
-  password: string,
-): Promise<{ error: string } | { success: true }> {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+): Promise<{ email: string } | { error: string }> {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
   if (!serviceKey) return { error: "Configuração de servidor ausente." };
 
@@ -30,17 +27,5 @@ export async function signInWithUsername(
   const user = users.find((u) => u.user_metadata?.username === username);
   if (!user?.email) return { error: "Usuário não encontrado." };
 
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({
-    email: user.email,
-    password,
-  });
-
-  if (error) {
-    const m = error.message.toLowerCase();
-    if (m.includes("invalid")) return { error: "Usuário ou senha incorretos." };
-    return { error: error.message };
-  }
-
-  return { success: true };
+  return { email: user.email };
 }
