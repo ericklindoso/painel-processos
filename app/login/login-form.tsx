@@ -24,9 +24,10 @@ export function LoginForm() {
         body: JSON.stringify({ username: username.trim() }),
       });
 
-      const data = await res.json();
+      const text = await res.text();
+      const data = text ? JSON.parse(text) : {};
       if (!res.ok || data.error) {
-        setError(data.error ?? "Usuário não encontrado.");
+        setError(data.error ?? `Erro ${res.status}`);
         return;
       }
 
