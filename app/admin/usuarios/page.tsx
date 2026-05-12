@@ -1,38 +1,52 @@
-import { createClient as createSupabaseAdmin } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { UsersList } from "./users-list";
 
 export const dynamic = "force-dynamic";
 
-function adminClient() {
-  return createSupabaseAdmin(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } },
+type SupabaseUser = {
+  id: string;
+  email: string;
+  user_metadata?: { username?: string };
+  created_at: string;
+  last_sign_in_at: string | null;
+};
+
+async function fetchAllUsers(): Promise<SupabaseUser[]> {
+  const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "")
+    .replace(/^﻿/, "")
+    .trim();
+  const serviceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY ?? "")
+    .replace(/^﻿/, "")
+    .trim();
+
+  if (!supabaseUrl || !serviceKey) return [];
+
+  const res = await fetch(
+    `${supabaseUrl}/auth/v1/admin/users?per_page=1000`,
+    {
+      headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` },
+      cache: "no-store",
+    },
   );
+
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.users ?? [];
 }
 
 export default async function UsuariosPage() {
-  const admin = adminClient();
   const supabase = await createClient();
 
-  const [
-    {
-      data: { users },
-    },
-    {
-      data: { user: currentUser },
-    },
-  ] = await Promise.all([
-    admin.auth.admin.listUsers(),
+  const [users, { data: { user: currentUser } }] = await Promise.all([
+    fetchAllUsers(),
     supabase.auth.getUser(),
   ]);
 
   const rows = users.map((u) => ({
     id: u.id,
     email: u.email ?? "",
-    username: (u.user_metadata?.username as string) ?? "—",
+    username: u.user_metadata?.username ?? "—",
     created_at: u.created_at,
     last_sign_in_at: u.last_sign_in_at ?? null,
   }));
