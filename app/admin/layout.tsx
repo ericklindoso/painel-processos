@@ -48,6 +48,12 @@ export default async function AdminLayout({
                 Novo
               </Link>
               <Link
+                href="/admin/usuarios"
+                className="label-eyebrow hover:text-[--color-claret]"
+              >
+                Usuários
+              </Link>
+              <Link
                 href="/dashboard"
                 target="_blank"
                 rel="noreferrer"
@@ -60,7 +66,7 @@ export default async function AdminLayout({
 
           <div className="flex items-center gap-5">
             <span className="hidden font-mono text-[11px] uppercase tracking-wide text-[--color-ink-dim] md:inline">
-              {user.email}
+              {(user.user_metadata?.username as string) ?? user.email}
             </span>
             <form action={signOut}>
               <button type="submit" className="btn btn-text text-xs">
