@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { lookupEmail } from "./actions";
 
 export function LoginForm() {
   const router = useRouter();
@@ -18,17 +17,23 @@ export function LoginForm() {
     setLoading(true);
 
     try {
-      // Server action: busca o email pelo username (chave secreta fica no servidor)
-      const lookup = await lookupEmail(username.trim());
-      if ("error" in lookup) {
-        setError(lookup.error);
+      // Busca email pelo username via API route (chave secreta fica no servidor)
+      const res = await fetch("/api/auth/lookup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: username.trim() }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        setError(data.error ?? "Usuário não encontrado.");
         return;
       }
 
-      // Autenticação no cliente (igual ao fluxo original do Supabase)
+      // Autenticação com o Supabase browser client
       const supabase = createClient();
       const { error: authError } = await supabase.auth.signInWithPassword({
-        email: lookup.email,
+        email: data.email,
         password,
       });
 
