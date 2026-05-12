@@ -23,8 +23,8 @@ export function LoginForm() {
         router.push("/admin");
         router.refresh();
       }
-    } catch {
-      setError("Erro inesperado. Tente novamente.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
