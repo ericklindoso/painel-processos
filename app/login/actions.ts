@@ -1,6 +1,5 @@
 "use server";
 
-import { createClient as createSupabaseAdmin } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -8,18 +7,26 @@ export async function signInWithUsername(
   username: string,
   password: string,
 ): Promise<{ error: string }> {
-  const admin = createSupabaseAdmin(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { autoRefreshToken: false, persistSession: false } },
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!serviceKey) return { error: "Configuração de servidor ausente." };
+
+  const res = await fetch(
+    `${supabaseUrl}/auth/v1/admin/users?per_page=1000`,
+    {
+      headers: {
+        apikey: serviceKey,
+        Authorization: `Bearer ${serviceKey}`,
+      },
+    },
   );
 
-  const {
-    data: { users },
-    error: listError,
-  } = await admin.auth.admin.listUsers();
+  if (!res.ok) return { error: "Erro ao consultar usuários." };
 
-  if (listError) return { error: "Erro ao autenticar. Tente novamente." };
+  const data = await res.json();
+  const users: { email: string; user_metadata?: { username?: string } }[] =
+    data.users ?? [];
 
   const user = users.find((u) => u.user_metadata?.username === username);
   if (!user?.email) return { error: "Usuário não encontrado." };
