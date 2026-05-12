@@ -221,7 +221,7 @@ function BoardPanel({ rows }: { rows: Process[] }) {
 
   return (
     <div>
-      <div className="grid grid-cols-[200px_1fr_360px_140px] items-end gap-8 border-b border-[--color-ink] pb-2 text-[10px] font-medium uppercase tracking-[0.18em] text-[--color-ink-dim]">
+      <div className="grid grid-cols-[200px_1fr_360px_140px] items-end gap-8 border-b border-[--color-ink] pb-2 text-sm font-medium uppercase tracking-[0.18em] text-[--color-ink-dim]">
         <span>Nº Processo</span>
         <span>Objeto</span>
         <span>Status</span>
@@ -239,7 +239,7 @@ function BoardPanel({ rows }: { rows: Process[] }) {
           >
             {row ? (
               <>
-                <span className="font-mono text-lg font-medium text-[--color-ink] tabular">
+                <span className="font-mono text-xl font-medium text-[--color-ink] tabular">
                   {row.numero}
                 </span>
                 <span
