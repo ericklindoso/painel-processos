@@ -299,14 +299,20 @@ function SessionDateCell({
     minute: "2-digit",
   }).format(date);
 
+  if (isUpcomingSoon) {
+    return (
+      <span className="flex justify-end">
+        <span className="blink-warning inline-block rounded px-3 py-1 text-right font-mono text-base font-semibold uppercase tracking-wide tabular text-white">
+          {formatted}
+        </span>
+      </span>
+    );
+  }
+
   return (
     <span
       className={`text-right font-mono text-base font-medium uppercase tracking-wide tabular ${
-        isUpcomingSoon
-          ? "blink-warning text-[--color-claret]"
-          : isPast
-            ? "text-[--color-ink-mute]"
-            : "text-[--color-ink]"
+        isPast ? "text-[--color-ink-mute]" : "text-[--color-ink]"
       }`}
     >
       {formatted}
