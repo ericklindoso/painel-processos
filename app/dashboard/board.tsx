@@ -344,13 +344,15 @@ function LastUpdatesPanel({ events }: { events: ProcessEvent[] }) {
 
   return (
     <div>
-      <div className="mb-8 flex flex-col gap-3">
-        <p className="label-eyebrow text-[--color-claret]">Sumário do ciclo</p>
-        <h2 className="headline text-6xl text-[--color-ink] sm:text-7xl">
-          Últimas <em>atualizações</em>.
-        </h2>
-        <p className="max-w-2xl font-serif text-xl italic text-[--color-ink-dim]">
-          As cinco modificações mais recentes — em ordem cronológica decrescente.
+      <div className="mb-4 flex items-baseline justify-between gap-6">
+        <div className="flex items-baseline gap-4">
+          <p className="label-eyebrow text-[--color-claret]">Sumário do ciclo</p>
+          <h2 className="headline text-3xl text-[--color-ink]">
+            Últimas <em>atualizações</em>.
+          </h2>
+        </div>
+        <p className="hidden font-serif text-sm italic text-[--color-ink-dim] sm:block">
+          Cinco mais recentes — ordem decrescente.
         </p>
       </div>
 
@@ -369,11 +371,11 @@ function LastUpdatesPanel({ events }: { events: ProcessEvent[] }) {
                 initial={{ opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ ...TRANSITION, delay: 0.15 + i * 0.13 }}
-                className="grid grid-cols-[80px_1fr_200px] items-start gap-8 border-b border-[--color-rule-soft] py-6"
+                className="grid grid-cols-[60px_1fr_160px] items-start gap-6 border-b border-[--color-rule-soft] py-3"
               >
                 {/* Index + tempo relativo */}
-                <div className="flex flex-col gap-1 pt-1">
-                  <span className="font-serif text-4xl italic text-[--color-claret]">
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-serif text-2xl italic leading-none text-[--color-claret]">
                     {romanize(i + 1)}.
                   </span>
                   <span className="label-eyebrow text-[--color-ink-mute]">
@@ -382,11 +384,11 @@ function LastUpdatesPanel({ events }: { events: ProcessEvent[] }) {
                 </div>
 
                 {/* Narrativa */}
-                <div className="flex flex-col gap-3">
-                  <p className="font-serif text-2xl leading-relaxed text-[--color-ink]">
+                <div className="flex flex-col gap-1">
+                  <p className="font-serif text-base leading-snug text-[--color-ink]">
                     {buildNarrative(ev)}
                   </p>
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[--color-ink-mute]">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-[--color-ink-mute]">
                     <span>{formatFullDate(ev.created_at)}</span>
                     {ev.actor_email && (
                       <>
@@ -398,9 +400,9 @@ function LastUpdatesPanel({ events }: { events: ProcessEvent[] }) {
                 </div>
 
                 {/* Badge de tipo */}
-                <div className="flex justify-end pt-2">
-                  <span className="label-eyebrow rounded border border-[--color-rule] px-3 py-1 text-[--color-ink-dim]">
-                    □ {EVENT_LABELS[ev.event_type]}
+                <div className="flex justify-end">
+                  <span className="label-eyebrow rounded border border-[--color-rule] px-2 py-0.5 text-[--color-ink-dim]">
+                    {EVENT_LABELS[ev.event_type]}
                   </span>
                 </div>
               </motion.li>
