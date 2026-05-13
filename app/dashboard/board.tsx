@@ -245,7 +245,7 @@ function BoardPanel({ rows, now }: { rows: Process[]; now: Date | null }) {
                 </span>
                 <div className="flex min-w-0 flex-col gap-1.5">
                   <span
-                    className="truncate font-serif text-3xl leading-snug text-[--color-ink]"
+                    className="truncate font-serif text-xl leading-snug text-[--color-ink]"
                     title={row.objeto}
                   >
                     {row.objeto}
@@ -261,7 +261,7 @@ function BoardPanel({ rows, now }: { rows: Process[]; now: Date | null }) {
                 <span className="flex items-center gap-3">
                   <span className="color-chip" style={{ color: row.cor }} />
                   <span
-                    className="truncate font-sans text-lg font-medium uppercase tracking-wide"
+                    className="truncate font-sans text-xl font-medium uppercase tracking-wide"
                     style={{ color: row.cor }}
                   >
                     {row.status}
@@ -323,7 +323,7 @@ function SessionDateCell({
   if (isUpcomingSoon) {
     return (
       <span className="flex justify-end">
-        <span className="blink-warning inline-block rounded px-3 py-1 text-right font-mono text-base font-semibold uppercase tracking-wide tabular text-white">
+        <span className="blink-warning inline-block rounded px-3 py-1 text-right font-mono text-xl font-semibold uppercase tracking-wide tabular text-white">
           {formatted}
         </span>
       </span>
@@ -332,7 +332,7 @@ function SessionDateCell({
 
   return (
     <span
-      className={`text-right font-mono text-base font-medium uppercase tracking-wide tabular ${
+      className={`text-right font-mono text-xl font-medium uppercase tracking-wide tabular ${
         isPast ? "text-[--color-ink-mute]" : "text-[--color-ink]"
       }`}
     >
