@@ -11,6 +11,13 @@ function sanitizeColor(c: string | null | undefined): string {
   return /^#[0-9a-fA-F]{6}$/.test(c) ? c.toUpperCase() : COLOR_FALLBACK;
 }
 
+function parseDataSessao(v: string | null | undefined): string | null {
+  if (!v) return null;
+  const d = new Date(v);
+  if (isNaN(d.getTime())) return null;
+  return d.toISOString();
+}
+
 export async function createProcess(formData: FormData) {
   const supabase = await createClient();
   const {
@@ -22,6 +29,7 @@ export async function createProcess(formData: FormData) {
   const objeto = String(formData.get("objeto") ?? "").trim();
   const status = String(formData.get("status") ?? "").trim();
   const cor = sanitizeColor(String(formData.get("cor") ?? ""));
+  const data_sessao = parseDataSessao(formData.get("data_sessao") as string);
 
   if (!numero || !objeto || !status) {
     return { ok: false as const, error: "Preencha número, objeto e status." };
@@ -29,7 +37,7 @@ export async function createProcess(formData: FormData) {
 
   const { data: inserted, error } = await supabase
     .from("processes")
-    .insert({ numero, objeto, status, cor })
+    .insert({ numero, objeto, status, cor, data_sessao })
     .select("id")
     .single();
 
@@ -68,6 +76,7 @@ export async function updateProcess(id: string, formData: FormData) {
   const objeto = String(formData.get("objeto") ?? "").trim();
   const status = String(formData.get("status") ?? "").trim();
   const cor = sanitizeColor(String(formData.get("cor") ?? ""));
+  const data_sessao = parseDataSessao(formData.get("data_sessao") as string);
 
   if (!numero || !objeto || !status) {
     return { ok: false as const, error: "Preencha número, objeto e status." };
@@ -81,7 +90,7 @@ export async function updateProcess(id: string, formData: FormData) {
 
   const { error } = await supabase
     .from("processes")
-    .update({ numero, objeto, status, cor })
+    .update({ numero, objeto, status, cor, data_sessao })
     .eq("id", id);
 
   if (error) {

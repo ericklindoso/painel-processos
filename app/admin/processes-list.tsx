@@ -9,11 +9,11 @@ export function ProcessesList({ processes }: { processes: Process[] }) {
   return (
     <div>
       {/* Heading row */}
-      <div className="grid grid-cols-[160px_1fr_220px_140px_120px] items-center gap-6 border-b border-[--color-ink] pb-3 text-[10px] font-medium uppercase tracking-[0.18em] text-[--color-ink-dim]">
+      <div className="grid grid-cols-[160px_1fr_220px_170px_120px] items-center gap-6 border-b border-[--color-ink] pb-3 text-[10px] font-medium uppercase tracking-[0.18em] text-[--color-ink-dim]">
         <span>Nº Processo</span>
         <span>Objeto</span>
         <span>Status</span>
-        <span>Atualizado</span>
+        <span>Data da Sessão</span>
         <span className="text-right">Ações</span>
       </div>
 
@@ -43,7 +43,7 @@ function ProcessRow({ p }: { p: Process }) {
 
   return (
     <li
-      className={`group grid grid-cols-[160px_1fr_220px_140px_120px] items-center gap-6 border-b border-[--color-rule-soft] py-5 transition hover:bg-[--color-paper-soft] ${
+      className={`group grid grid-cols-[160px_1fr_220px_170px_120px] items-center gap-6 border-b border-[--color-rule-soft] py-5 transition hover:bg-[--color-paper-soft] ${
         pending ? "opacity-40" : ""
       }`}
     >
@@ -61,7 +61,7 @@ function ProcessRow({ p }: { p: Process }) {
         </span>
       </span>
       <span className="font-mono text-xs uppercase tracking-wide text-[--color-ink-dim]">
-        {formatDate(p.updated_at)}
+        {p.data_sessao ? formatDate(p.data_sessao) : "—"}
       </span>
       <span className="flex items-center justify-end gap-4">
         <Link href={`/admin/${p.id}/edit`} className="btn btn-text text-xs">

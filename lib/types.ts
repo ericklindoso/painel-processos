@@ -4,6 +4,7 @@ export type Process = {
   objeto: string;
   status: string;
   cor: string;
+  data_sessao: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -13,6 +14,7 @@ export type ProcessInput = {
   objeto: string;
   status: string;
   cor: string;
+  data_sessao: string | null;
 };
 
 export type ProcessEventType = "created" | "status_changed" | "updated" | "deleted";

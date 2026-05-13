@@ -160,7 +160,7 @@ export function Board({
             {isLastUpdates ? (
               <LastUpdatesPanel events={events} />
             ) : (
-              <BoardPanel rows={currentPage ?? []} />
+              <BoardPanel rows={currentPage ?? []} now={now} />
             )}
           </motion.div>
         </AnimatePresence>
@@ -198,7 +198,7 @@ export function Board({
   );
 }
 
-function BoardPanel({ rows }: { rows: Process[] }) {
+function BoardPanel({ rows, now }: { rows: Process[]; now: Date | null }) {
   if (rows.length === 0) {
     return (
       <div className="flex min-h-[55vh] flex-col items-center justify-center gap-5 text-center">
@@ -221,11 +221,11 @@ function BoardPanel({ rows }: { rows: Process[] }) {
 
   return (
     <div>
-      <div className="grid grid-cols-[200px_1fr_360px_140px] items-end gap-8 border-b border-[--color-ink] pb-2 text-sm font-medium uppercase tracking-[0.18em] text-[--color-ink-dim]">
+      <div className="grid grid-cols-[200px_1fr_360px_180px] items-end gap-8 border-b border-[--color-ink] pb-2 text-sm font-medium uppercase tracking-[0.18em] text-[--color-ink-dim]">
         <span>Nº Processo</span>
         <span>Objeto</span>
         <span>Status</span>
-        <span className="text-right">Atualizado</span>
+        <span className="text-right">Data da Sessão</span>
       </div>
 
       <ul className="board-rows">
@@ -235,7 +235,7 @@ function BoardPanel({ rows }: { rows: Process[] }) {
             initial={{ opacity: 0, x: -12 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ ...TRANSITION, delay: 0.08 + i * 0.06 }}
-            className="grid grid-cols-[200px_1fr_360px_140px] items-center gap-8 py-5"
+            className="grid grid-cols-[200px_1fr_360px_180px] items-center gap-8 py-5"
           >
             {row ? (
               <>
@@ -257,9 +257,7 @@ function BoardPanel({ rows }: { rows: Process[] }) {
                     {row.status}
                   </span>
                 </span>
-                <span className="text-right font-mono text-sm uppercase tracking-wide text-[--color-ink-dim]">
-                  {formatRelative(row.updated_at)}
-                </span>
+                <SessionDateCell iso={row.data_sessao} now={now} />
               </>
             ) : (
               <span className="col-span-4 h-8" />
@@ -268,6 +266,51 @@ function BoardPanel({ rows }: { rows: Process[] }) {
         ))}
       </ul>
     </div>
+  );
+}
+
+function SessionDateCell({
+  iso,
+  now,
+}: {
+  iso: string | null;
+  now: Date | null;
+}) {
+  if (!iso) {
+    return (
+      <span className="text-right font-mono text-sm uppercase tracking-wide text-[--color-ink-mute]">
+        —
+      </span>
+    );
+  }
+
+  const date = new Date(iso);
+  const reference = now ?? new Date();
+  const diffMs = date.getTime() - reference.getTime();
+  const oneDayMs = 24 * 60 * 60 * 1000;
+  const isUpcomingSoon = diffMs > 0 && diffMs < oneDayMs;
+  const isPast = diffMs < 0;
+
+  const formatted = new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+
+  return (
+    <span
+      className={`text-right font-mono text-base font-medium uppercase tracking-wide tabular ${
+        isUpcomingSoon
+          ? "blink-warning text-[--color-claret]"
+          : isPast
+            ? "text-[--color-ink-mute]"
+            : "text-[--color-ink]"
+      }`}
+    >
+      {formatted}
+    </span>
   );
 }
 

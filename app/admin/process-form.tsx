@@ -77,6 +77,15 @@ export function ProcessForm({ initial, action, submitLabel }: Props) {
           />
         </Field>
 
+        <Field label="Data da sessão" hint="opcional · piscará no telão quando faltar < 24h">
+          <input
+            name="data_sessao"
+            type="datetime-local"
+            defaultValue={toLocalDateTime(initial?.data_sessao)}
+            className="field-input field-mono"
+          />
+        </Field>
+
         {error && (
           <div className="border-l-2 border-[--color-claret] bg-[--color-claret-soft]/30 px-4 py-3 text-sm text-[--color-claret]">
             {error}
@@ -161,6 +170,14 @@ export function ProcessForm({ initial, action, submitLabel }: Props) {
       </aside>
     </form>
   );
+}
+
+function toLocalDateTime(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 function Field({
