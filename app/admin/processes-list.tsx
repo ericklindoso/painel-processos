@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import type { Process } from "@/lib/types";
+import { contrastText } from "@/lib/contrast";
 import { deleteProcess } from "./actions";
 
 export function ProcessesList({ processes }: { processes: Process[] }) {
@@ -48,9 +49,27 @@ function ProcessRow({ p }: { p: Process }) {
       }`}
     >
       <span className="truncate font-mono text-sm text-[--color-ink]">{p.numero}</span>
-      <span className="truncate font-serif text-lg leading-snug text-[--color-ink]" title={p.objeto}>
-        {p.objeto}
-      </span>
+      <div className="flex min-w-0 flex-col gap-1.5">
+        <span
+          className="truncate font-serif text-lg leading-snug text-[--color-ink]"
+          title={p.objeto}
+        >
+          {p.objeto}
+        </span>
+        {p.tags && p.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {p.tags.map((t, i) => (
+              <span
+                key={i}
+                style={{ backgroundColor: t.color, color: contrastText(t.color) }}
+                className="inline-flex items-center rounded px-1.5 py-0.5 font-sans text-[10px] font-semibold uppercase tracking-[0.12em]"
+              >
+                {t.label}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
       <span className="flex items-center gap-2.5">
         <span className="color-chip" style={{ color: p.cor }} />
         <span

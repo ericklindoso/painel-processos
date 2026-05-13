@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
-import type { Process, ProcessEvent, ProcessEventType } from "@/lib/types";
+import type { Process, ProcessEvent, ProcessEventType, Tag } from "@/lib/types";
+import { contrastText } from "@/lib/contrast";
 
 const ROWS_PER_PAGE = 6;
 const PAGE_DURATION_MS = 7500;
@@ -235,19 +236,28 @@ function BoardPanel({ rows, now }: { rows: Process[]; now: Date | null }) {
             initial={{ opacity: 0, x: -12 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ ...TRANSITION, delay: 0.08 + i * 0.06 }}
-            className="grid grid-cols-[200px_1fr_360px_180px] items-center gap-8 py-5"
+            className="grid grid-cols-[200px_1fr_360px_180px] items-center gap-8 py-4"
           >
             {row ? (
               <>
                 <span className="font-mono text-xl font-medium text-[--color-ink] tabular">
                   {row.numero}
                 </span>
-                <span
-                  className="truncate font-serif text-3xl leading-snug text-[--color-ink]"
-                  title={row.objeto}
-                >
-                  {row.objeto}
-                </span>
+                <div className="flex min-w-0 flex-col gap-1.5">
+                  <span
+                    className="truncate font-serif text-3xl leading-snug text-[--color-ink]"
+                    title={row.objeto}
+                  >
+                    {row.objeto}
+                  </span>
+                  {row.tags && row.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {row.tags.map((t, idx) => (
+                        <TagPill key={idx} tag={t} />
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <span className="flex items-center gap-3">
                   <span className="color-chip" style={{ color: row.cor }} />
                   <span
@@ -266,6 +276,17 @@ function BoardPanel({ rows, now }: { rows: Process[]; now: Date | null }) {
         ))}
       </ul>
     </div>
+  );
+}
+
+function TagPill({ tag }: { tag: Tag }) {
+  return (
+    <span
+      style={{ backgroundColor: tag.color, color: contrastText(tag.color) }}
+      className="inline-flex items-center rounded px-2 py-0.5 font-sans text-[11px] font-semibold uppercase tracking-[0.12em]"
+    >
+      {tag.label}
+    </span>
   );
 }
 

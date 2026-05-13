@@ -1,3 +1,8 @@
+export type Tag = {
+  label: string;
+  color: string;
+};
+
 export type Process = {
   id: string;
   numero: string;
@@ -5,6 +10,7 @@ export type Process = {
   status: string;
   cor: string;
   data_sessao: string | null;
+  tags: Tag[];
   created_at: string;
   updated_at: string;
 };
@@ -15,6 +21,7 @@ export type ProcessInput = {
   status: string;
   cor: string;
   data_sessao: string | null;
+  tags: Tag[];
 };
 
 export type ProcessEventType = "created" | "status_changed" | "updated" | "deleted";

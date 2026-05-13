@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import type { Process } from "@/lib/types";
+import type { Process, Tag } from "@/lib/types";
+import { contrastText } from "@/lib/contrast";
 
 const PRESET_COLORS = [
   { name: "Marinho", value: "#0E1A2D" },
@@ -28,12 +29,28 @@ export function ProcessForm({ initial, action, submitLabel }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [color, setColor] = useState(initial?.cor ?? PRESET_COLORS[0].value);
   const [statusPreview, setStatusPreview] = useState(initial?.status ?? "");
+  const [tags, setTags] = useState<Tag[]>(initial?.tags ?? []);
+  const [newTagLabel, setNewTagLabel] = useState("");
+  const [newTagColor, setNewTagColor] = useState(PRESET_COLORS[0].value);
+
+  function addTag() {
+    const label = newTagLabel.trim();
+    if (!label) return;
+    if (tags.some((t) => t.label.toLowerCase() === label.toLowerCase())) return;
+    setTags([...tags, { label, color: newTagColor }]);
+    setNewTagLabel("");
+  }
+
+  function removeTag(idx: number) {
+    setTags(tags.filter((_, i) => i !== idx));
+  }
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     const fd = new FormData(e.currentTarget);
     fd.set("cor", color);
+    fd.set("tags", JSON.stringify(tags));
     startTransition(async () => {
       const res = await action(fd);
       if (res && !res.ok) setError(res.error);
@@ -84,6 +101,69 @@ export function ProcessForm({ initial, action, submitLabel }: Props) {
             defaultValue={toLocalDateTime(initial?.data_sessao)}
             className="field-input field-mono"
           />
+        </Field>
+
+        <Field label="Tags" hint="opcional · ex: Rural, Urbano, PE, CP, Inex">
+          <div className="space-y-3">
+            <div className="flex min-h-[2.25rem] flex-wrap items-center gap-2">
+              {tags.length === 0 ? (
+                <span className="font-serif text-sm italic text-[--color-ink-mute]">
+                  Nenhuma tag adicionada.
+                </span>
+              ) : (
+                tags.map((t, i) => (
+                  <span
+                    key={i}
+                    style={{
+                      backgroundColor: t.color,
+                      color: contrastText(t.color),
+                    }}
+                    className="inline-flex items-center gap-1.5 rounded px-2.5 py-1 font-sans text-xs font-medium uppercase tracking-wide"
+                  >
+                    {t.label}
+                    <button
+                      type="button"
+                      onClick={() => removeTag(i)}
+                      className="text-base leading-none opacity-70 hover:opacity-100"
+                      aria-label="Remover tag"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))
+              )}
+            </div>
+
+            <div className="flex items-stretch gap-2">
+              <input
+                type="text"
+                value={newTagLabel}
+                onChange={(e) => setNewTagLabel(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addTag();
+                  }
+                }}
+                placeholder="Nova tag (Enter para adicionar)"
+                className="field-input field-mono flex-1"
+              />
+              <input
+                type="color"
+                value={newTagColor}
+                onChange={(e) => setNewTagColor(e.target.value.toUpperCase())}
+                className="h-11 w-14 cursor-pointer border border-[--color-rule] bg-white"
+                title="Cor da tag"
+              />
+              <button
+                type="button"
+                onClick={addTag}
+                className="btn btn-text whitespace-nowrap text-xs"
+              >
+                + Adicionar
+              </button>
+            </div>
+          </div>
         </Field>
 
         {error && (

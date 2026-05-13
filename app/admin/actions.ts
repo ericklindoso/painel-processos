@@ -18,6 +18,29 @@ function parseDataSessao(v: string | null | undefined): string | null {
   return d.toISOString();
 }
 
+function parseTags(v: string | null | undefined): { label: string; color: string }[] {
+  if (!v) return [];
+  try {
+    const parsed = JSON.parse(v);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter(
+        (t): t is { label: string; color: string } =>
+          t &&
+          typeof t.label === "string" &&
+          typeof t.color === "string" &&
+          t.label.trim().length > 0,
+      )
+      .map((t) => ({
+        label: t.label.trim().slice(0, 30),
+        color: /^#[0-9a-fA-F]{6}$/.test(t.color) ? t.color.toUpperCase() : "#7A1F12",
+      }))
+      .slice(0, 10);
+  } catch {
+    return [];
+  }
+}
+
 export async function createProcess(formData: FormData) {
   const supabase = await createClient();
   const {
@@ -30,6 +53,7 @@ export async function createProcess(formData: FormData) {
   const status = String(formData.get("status") ?? "").trim();
   const cor = sanitizeColor(String(formData.get("cor") ?? ""));
   const data_sessao = parseDataSessao(formData.get("data_sessao") as string);
+  const tags = parseTags(formData.get("tags") as string);
 
   if (!numero || !objeto || !status) {
     return { ok: false as const, error: "Preencha número, objeto e status." };
@@ -37,7 +61,7 @@ export async function createProcess(formData: FormData) {
 
   const { data: inserted, error } = await supabase
     .from("processes")
-    .insert({ numero, objeto, status, cor, data_sessao })
+    .insert({ numero, objeto, status, cor, data_sessao, tags })
     .select("id")
     .single();
 
@@ -77,6 +101,7 @@ export async function updateProcess(id: string, formData: FormData) {
   const status = String(formData.get("status") ?? "").trim();
   const cor = sanitizeColor(String(formData.get("cor") ?? ""));
   const data_sessao = parseDataSessao(formData.get("data_sessao") as string);
+  const tags = parseTags(formData.get("tags") as string);
 
   if (!numero || !objeto || !status) {
     return { ok: false as const, error: "Preencha número, objeto e status." };
@@ -90,7 +115,7 @@ export async function updateProcess(id: string, formData: FormData) {
 
   const { error } = await supabase
     .from("processes")
-    .update({ numero, objeto, status, cor, data_sessao })
+    .update({ numero, objeto, status, cor, data_sessao, tags })
     .eq("id", id);
 
   if (error) {
