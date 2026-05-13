@@ -51,6 +51,13 @@ export function ProcessForm({ initial, action, submitLabel }: Props) {
     const fd = new FormData(e.currentTarget);
     fd.set("cor", color);
     fd.set("tags", JSON.stringify(tags));
+    // Converte datetime-local (interpretado como horário local do browser)
+    // para ISO com timezone — evita o servidor em UTC reinterpretar como UTC.
+    const localValue = fd.get("data_sessao");
+    if (typeof localValue === "string" && localValue.length > 0) {
+      const isoLocal = new Date(localValue).toISOString();
+      fd.set("data_sessao", isoLocal);
+    }
     startTransition(async () => {
       const res = await action(fd);
       if (res && !res.ok) setError(res.error);
